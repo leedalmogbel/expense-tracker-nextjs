@@ -1,10 +1,27 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useExpense } from "@/contexts/expense-context"
 import { getCategoryIconComponent } from "@/lib/category-icons"
 import { CATEGORIES } from "@/lib/constants"
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button as HeroUIButton,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/react"
+import { MoreVertical, Pencil, Trash2 } from "lucide-react"
+import type { Transaction } from "@/lib/types"
+import { EditTransactionModal } from "@/components/dashboard/edit-transaction-modal"
+import { Button } from "@/components/ui/button"
 
 const CHART_COLORS = [
   "bg-primary/10 text-primary",
@@ -26,12 +43,23 @@ export function RecentTransactions() {
     selectedCategoryFilter,
     setSelectedCategoryFilter,
     formatCurrency,
+    deleteTransactionById,
   } = useExpense()
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null)
 
   const categoryOptions = ["all", ...CATEGORIES.map((c) => normalizeCategory(c))]
   const filteredTotal = filteredTransactions.reduce((sum, t) => sum + t.amount, 0)
 
+  const handleDeleteConfirm = () => {
+    if (deletingTransaction) {
+      deleteTransactionById(deletingTransaction.id)
+      setDeletingTransaction(null)
+    }
+  }
+
   return (
+    <>
     <Card className="border-border">
       <CardHeader className="p-4 pb-2 sm:p-6 sm:pb-3">
         <div className="flex items-center justify-between">
@@ -81,7 +109,7 @@ export function RecentTransactions() {
                   return (
                     <div
                       key={tx.id}
-                      className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 transition-colors hover:bg-muted/50"
+                      className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 transition-colors hover:bg-muted/50 group"
                     >
                       <div
                         className={cn(
@@ -95,7 +123,7 @@ export function RecentTransactions() {
                         <p className="truncate text-sm font-medium text-foreground">{tx.description}</p>
                         <p className="text-xs text-muted-foreground">{tx.category}</p>
                       </div>
-                      <div className="min-w-0 shrink-0 text-right">
+                      <div className="min-w-0 shrink-0 text-right flex items-center gap-1">
                         <span
                           className={cn(
                             "text-sm font-semibold whitespace-nowrap",
@@ -104,6 +132,37 @@ export function RecentTransactions() {
                         >
                           {formatCurrency(tx.amount)}
                         </span>
+                        <Dropdown placement="bottom-end">
+                          <DropdownTrigger>
+                            <HeroUIButton
+                              isIconOnly
+                              variant="light"
+                              size="sm"
+                              className="min-w-8 w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground"
+                              aria-label="Transaction actions"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </HeroUIButton>
+                          </DropdownTrigger>
+                          <DropdownMenu aria-label="Edit or delete transaction">
+                            <DropdownItem
+                              key="edit"
+                              startContent={<Pencil className="h-4 w-4" />}
+                              onPress={() => setEditingTransaction(tx)}
+                            >
+                              Edit
+                            </DropdownItem>
+                            <DropdownItem
+                              key="delete"
+                              className="text-destructive"
+                              color="danger"
+                              startContent={<Trash2 className="h-4 w-4" />}
+                              onPress={() => setDeletingTransaction(tx)}
+                            >
+                              Delete
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </Dropdown>
                       </div>
                     </div>
                   )
@@ -114,5 +173,53 @@ export function RecentTransactions() {
         </div>
       </CardContent>
     </Card>
+
+    <EditTransactionModal
+      open={editingTransaction !== null}
+      onOpenChange={(open) => !open && setEditingTransaction(null)}
+      transaction={editingTransaction}
+    />
+
+    <Modal
+      isOpen={deletingTransaction !== null}
+      onOpenChange={(open) => !open && setDeletingTransaction(null)}
+      placement="center"
+      isDismissable
+      classNames={{
+        base: "border border-border bg-background text-foreground mx-4 shadow-2xl rounded-xl",
+        header: "border-b border-border",
+        footer: "border-t border-border",
+      }}
+    >
+      <ModalContent>
+        <ModalHeader className="flex flex-col gap-1">
+          <span className="text-lg font-semibold">Delete transaction?</span>
+        </ModalHeader>
+        <ModalBody>
+          <p className="text-sm text-muted-foreground">
+            {deletingTransaction ? (
+              <>
+                This will permanently remove &quot;{deletingTransaction.description}&quot;. This cannot be undone.
+              </>
+            ) : (
+              "This cannot be undone."
+            )}
+          </p>
+        </ModalBody>
+        <ModalFooter className="gap-2">
+          <Button variant="outline" onClick={() => setDeletingTransaction(null)} className="rounded-lg">
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteConfirm}
+            className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Delete
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  </>
   )
 }
