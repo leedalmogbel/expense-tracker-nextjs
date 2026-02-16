@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    /* Warm paper-like background, easy on the eye */
+    --background: 42 22% 97%;
+    --foreground: 220 18% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 18% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 18% 14%;
+    /* Sage green – budgeting / income / trust */
+    --primary: 158 36% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 42 18% 93%;
+    --secondary-foreground: 220 12% 18%;
+    --muted: 42 16% 94%;
+    --muted-foreground: 220 10% 44%;
+    --accent: 158 28% 92%;
+    --accent-foreground: 158 36% 26%;
+    /* Clear expense / over-budget red */
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 14% 90%;
+    --input: 40 14% 90%;
+    --ring: 158 36% 36%;
+    /* Charts: income green, expense red, categories */
+    --chart-1: 158 36% 40%;
+    --chart-2: 199 55% 48%;
+    --chart-3: 38 72% 52%;
+    --chart-4: 0 65% 48%;
+    --chart-5: 262 48% 52%;
+    --radius: 0.625rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 18% 14%;
+    --sidebar-primary: 158 36% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 158 28% 92%;
+    --sidebar-accent-foreground: 158 36% 26%;
+    --sidebar-border: 40 14% 90%;
+    --sidebar-ring: 158 36% 36%;
+    --success: 158 36% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 72% 48%;
+    --warning-foreground: 220 18% 14%;
+  }
+
+  .dark {
+    /* Deep slate, not pure black */
+    --background: 222 20% 9%;
+    --foreground: 42 12% 94%;
+    --card: 222 18% 12%;
+    --card-foreground: 42 12% 94%;
+    --popover: 222 18% 12%;
+    --popover-foreground: 42 12% 94%;
+    --primary: 158 38% 44%;
+    --primary-foreground: 220 20% 10%;
+    --secondary: 222 14% 15%;
+    --secondary-foreground: 42 10% 88%;
+    --muted: 222 14% 15%;
+    --muted-foreground: 220 10% 52%;
+    --accent: 158 25% 18%;
+    --accent-foreground: 158 38% 58%;
+    --destructive: 0 58% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 14% 18%;
+    --input: 222 14% 18%;
+    --ring: 158 38% 44%;
+    --chart-1: 158 38% 48%;
+    --chart-2: 199 55% 55%;
+    --chart-3: 38 70% 58%;
+    --chart-4: 0 58% 52%;
+    --chart-5: 262 48% 58%;
+    --sidebar-background: 222 20% 10%;
+    --sidebar-foreground: 42 12% 94%;
+    --sidebar-primary: 158 38% 44%;
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 158 25% 18%;
+    --sidebar-accent-foreground: 158 38% 58%;
+    --sidebar-border: 222 14% 18%;
+    --sidebar-ring: 158 38% 44%;
+    --success: 158 38% 46%;
+    --success-foreground: 220 20% 10%;
+    --warning: 38 70% 52%;
+    --warning-foreground: 222 20% 9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Week calendar: selected date gets primary highlight (library or our fallback) */
+.week-calendar-root [data-selected="true"],
+.week-calendar-root .calendar-selected-by-date {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+/* Today: subtle ring when not selected so it’s still visible */
+.week-calendar-root [data-today="true"]:not([data-selected="true"]):not(.calendar-selected-by-date) {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.5);
+}
