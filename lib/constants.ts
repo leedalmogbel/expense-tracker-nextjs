@@ -81,6 +81,33 @@ export const CATEGORY_OPTIONS = CATEGORIES.map((label) => ({
   icon: CATEGORY_ICONS[label] ?? "circle-dot",
 }))
 
+/** Income categories */
+export const INCOME_CATEGORIES = [
+  "Salary",
+  "Freelance",
+  "Business",
+  "Investment",
+  "Gift",
+  "Other",
+] as const
+
+export type IncomeCategoryType = (typeof INCOME_CATEGORIES)[number]
+
+export const INCOME_CATEGORY_ICONS: Record<string, string> = {
+  Salary: "briefcase",
+  Freelance: "laptop",
+  Business: "building",
+  Investment: "trending-up",
+  Gift: "gift",
+  Other: "circle-dot",
+}
+
+export const INCOME_CATEGORY_OPTIONS = INCOME_CATEGORIES.map((label) => ({
+  value: label.toLowerCase().replace(/\s+/g, "-"),
+  label,
+  icon: INCOME_CATEGORY_ICONS[label] ?? "circle-dot",
+}))
+
 /** Default category budget splits when creating first budget (% of total). */
 export const DEFAULT_CATEGORY_BUDGETS: { category: string; pct: number; icon: string }[] = [
   { category: "Food & Drink", pct: 20, icon: "utensils" },

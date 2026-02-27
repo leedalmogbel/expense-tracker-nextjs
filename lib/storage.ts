@@ -1,6 +1,6 @@
 "use client"
 
-import type { Transaction, MonthlyBudget, Currency } from "./types"
+import type { Transaction, MonthlyBudget, Currency, CreditCardReminder, ShoppingTrip } from "./types"
 import { STORAGE_KEYS } from "./types"
 import { DEFAULT_CURRENCY } from "./constants"
 
@@ -104,6 +104,39 @@ export function setPaymentMethods(methods: string[]): void {
   setItem(STORAGE_KEYS.PAYMENT_METHODS, methods)
 }
 
+// --- Credit Card Reminders ---
+
+export function getCreditCardReminders(): CreditCardReminder[] {
+  return getItem<CreditCardReminder[]>(STORAGE_KEYS.CREDIT_CARD_REMINDERS) ?? []
+}
+
+export function saveCreditCardReminders(reminders: CreditCardReminder[]): void {
+  setItem(STORAGE_KEYS.CREDIT_CARD_REMINDERS, reminders)
+}
+
+export function addCreditCardReminder(
+  reminder: Omit<CreditCardReminder, "id" | "createdAt" | "updatedAt">
+): CreditCardReminder {
+  const reminders = getCreditCardReminders()
+  const now = new Date().toISOString()
+  const id = `cc-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newReminder: CreditCardReminder = { ...reminder, id, createdAt: now, updatedAt: now }
+  saveCreditCardReminders([newReminder, ...reminders])
+  return newReminder
+}
+
+export function updateCreditCardReminder(id: string, updates: Partial<CreditCardReminder>): void {
+  const reminders = getCreditCardReminders()
+  const index = reminders.findIndex((r) => r.id === id)
+  if (index === -1) return
+  reminders[index] = { ...reminders[index], ...updates, updatedAt: new Date().toISOString() }
+  saveCreditCardReminders(reminders)
+}
+
+export function deleteCreditCardReminder(id: string): void {
+  saveCreditCardReminders(getCreditCardReminders().filter((r) => r.id !== id))
+}
+
 // --- Device ID (for Supabase sync) ---
 
 export function getDeviceId(): string {
@@ -113,6 +146,41 @@ export function getDeviceId(): string {
     setItem(STORAGE_KEYS.DEVICE_ID, id)
   }
   return id
+}
+
+// --- Shopping Trips ---
+
+export function getShoppingTrips(): ShoppingTrip[] {
+  return getItem<ShoppingTrip[]>(STORAGE_KEYS.SHOPPING_TRIPS) ?? []
+}
+
+export function saveShoppingTrips(trips: ShoppingTrip[]): void {
+  setItem(STORAGE_KEYS.SHOPPING_TRIPS, trips)
+}
+
+export function addShoppingTrip(trip: Omit<ShoppingTrip, "id" | "createdAt" | "updatedAt">): ShoppingTrip {
+  const trips = getShoppingTrips()
+  const now = new Date().toISOString()
+  const id = `trip-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newTrip: ShoppingTrip = { ...trip, id, createdAt: now, updatedAt: now }
+  saveShoppingTrips([newTrip, ...trips])
+  return newTrip
+}
+
+export function updateShoppingTrip(id: string, updates: Partial<ShoppingTrip>): void {
+  const trips = getShoppingTrips()
+  const index = trips.findIndex((t) => t.id === id)
+  if (index === -1) return
+  trips[index] = { ...trips[index], ...updates, updatedAt: new Date().toISOString() }
+  saveShoppingTrips(trips)
+}
+
+export function deleteShoppingTrip(id: string): void {
+  saveShoppingTrips(getShoppingTrips().filter((t) => t.id !== id))
+}
+
+export function getActiveShoppingTrip(): ShoppingTrip | null {
+  return getShoppingTrips().find((t) => t.status === "active") ?? null
 }
 
 // --- Clear all ---

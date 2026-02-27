@@ -1,6 +1,6 @@
 "use client"
 
-import type { Transaction, MonthlyBudget } from "./types"
+import type { Transaction, MonthlyBudget, CreditCardReminder } from "./types"
 import { format, subMonths, startOfMonth, endOfMonth, parseISO } from "date-fns"
 
 /** Get current year/month */
@@ -161,6 +161,26 @@ export function groupTransactionsByDate(
     }))
 }
 
+/** Get previous month's year/month from a given year/month */
+export function getPreviousMonth(year: number, month: number): { year: number; month: number } {
+  if (month === 1) return { year: year - 1, month: 12 }
+  return { year, month: month - 1 }
+}
+
+/** Calculate month-over-month percentage change */
+export function getMonthOverMonthChange(
+  current: number,
+  previous: number
+): { text: string; trend: "up" | "down" | "neutral" } {
+  if (previous === 0 && current === 0) return { text: "0%", trend: "neutral" }
+  if (previous === 0) return { text: "+100%", trend: "up" }
+  const pctChange = ((current - previous) / previous) * 100
+  const rounded = Math.abs(pctChange).toFixed(1).replace(/\.0$/, "")
+  if (pctChange > 0.5) return { text: `+${rounded}%`, trend: "up" }
+  if (pctChange < -0.5) return { text: `-${rounded}%`, trend: "down" }
+  return { text: "0%", trend: "neutral" }
+}
+
 /** Chart data for last 7 months (rolling from current month). */
 export function getChartDataLast7Months(
   transactions: Transaction[]
@@ -185,4 +205,82 @@ export function getChartDataLast7Months(
     })
   }
   return result
+}
+
+/** Get income transactions for a specific month */
+export function getIncomeTransactionsForMonth(
+  transactions: Transaction[],
+  year: number,
+  month: number
+): Transaction[] {
+  return filterTransactionsByMonth(transactions, year, month).filter((t) => t.amount > 0)
+}
+
+/** Income chart data for last N months */
+export function getIncomeChartData(
+  transactions: Transaction[],
+  monthCount: number = 7
+): { month: string; monthKey: string; year: number; monthNum: number; income: number }[] {
+  const now = new Date()
+  const result = []
+  for (let i = monthCount - 1; i >= 0; i--) {
+    const d = subMonths(new Date(now.getFullYear(), now.getMonth(), 1), i)
+    const y = d.getFullYear()
+    const m = d.getMonth() + 1
+    const list = filterTransactionsByMonth(transactions, y, m)
+    result.push({
+      month: format(d, "MMM"),
+      monthKey: `${y}-${m}`,
+      year: y,
+      monthNum: m,
+      income: sumIncome(list),
+    })
+  }
+  return result
+}
+
+/** Average monthly income over last N months (only months with data) */
+export function getAverageMonthlyIncome(transactions: Transaction[], monthCount: number = 6): number {
+  const data = getIncomeChartData(transactions, monthCount)
+  const withIncome = data.filter((d) => d.income > 0)
+  if (withIncome.length === 0) return 0
+  return withIncome.reduce((sum, d) => sum + d.income, 0) / withIncome.length
+}
+
+/** Group income by category for a month */
+export function getIncomeByCategory(
+  transactions: Transaction[],
+  year: number,
+  month: number
+): { category: string; amount: number }[] {
+  const byCategory: Record<string, number> = {}
+  getIncomeTransactionsForMonth(transactions, year, month).forEach((t) => {
+    const cat = t.category || "Other"
+    byCategory[cat] = (byCategory[cat] ?? 0) + t.amount
+  })
+  return Object.entries(byCategory)
+    .map(([category, amount]) => ({ category, amount }))
+    .sort((a, b) => b.amount - a.amount)
+}
+
+/** Check which credit card reminders are due within their reminder window */
+export function getDueReminders(reminders: CreditCardReminder[]): CreditCardReminder[] {
+  const today = new Date()
+  const currentDay = today.getDate()
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+
+  return reminders.filter((r) => {
+    if (!r.isActive) return false
+    const dueDay = Math.min(r.dueDay, daysInMonth)
+    let daysUntil = dueDay - currentDay
+    if (daysUntil < 0) daysUntil += daysInMonth // wraps to next month
+    return daysUntil >= 0 && daysUntil <= r.reminderDaysBefore
+  })
+}
+
+/** Ordinal suffix for day numbers (1st, 2nd, 3rd, etc.) */
+export function getOrdinalSuffix(n: number): string {
+  const s = ["th", "st", "nd", "rd"]
+  const v = n % 100
+  return n + (s[(v - 20) % 10] || s[v] || s[0])
 }
