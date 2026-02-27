@@ -665,3 +665,78 @@ export async function revokeInvite(
     .eq("id", inviteId)
   return { error: error?.message ?? null }
 }
+
+/**
+ * Activity log entry with creator info.
+ */
+export type ActivityLogEntry = {
+  id: string
+  type: "income" | "expense"
+  amount: number
+  note: string | null
+  transaction_date: string
+  created_at: string
+  created_by: string | null
+  creator_name: string | null
+  category_name: string | null
+  category_icon: string | null
+}
+
+/**
+ * Fetch household transactions with creator profile info for the activity log.
+ */
+export async function fetchHouseholdActivityLog(
+  userId: string,
+  options?: { limit?: number; offset?: number }
+): Promise<{ entries: ActivityLogEntry[]; error: string | null }> {
+  if (!supabase) return { entries: [], error: "Supabase is not configured." }
+
+  const { householdId, error: houseError } = await getOrCreateDefaultHousehold(userId)
+  if (houseError || !householdId) return { entries: [], error: houseError ?? "Could not get household." }
+
+  const limit = options?.limit ?? 50
+  const offset = options?.offset ?? 0
+
+  const { data: rows, error } = await supabase
+    .from("transactions")
+    .select("id, type, amount, note, transaction_date, created_at, created_by, categories(name, icon)")
+    .eq("household_id", householdId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) return { entries: [], error: error.message }
+
+  // Collect unique creator IDs and fetch profiles separately (avoids FK constraint requirement)
+  const creatorIds = [...new Set((rows ?? []).map((r: Record<string, unknown>) => r.created_by as string).filter(Boolean))]
+  const profileMap: Record<string, string> = {}
+
+  if (creatorIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", creatorIds)
+    if (profiles) {
+      for (const p of profiles) {
+        profileMap[p.id] = p.full_name ?? "Unknown"
+      }
+    }
+  }
+
+  const entries: ActivityLogEntry[] = (rows ?? []).map((row: Record<string, unknown>) => {
+    const categories = row.categories as { name: string | null; icon: string | null } | null
+    return {
+      id: row.id as string,
+      type: row.type as "income" | "expense",
+      amount: row.amount as number,
+      note: row.note as string | null,
+      transaction_date: row.transaction_date as string,
+      created_at: row.created_at as string,
+      created_by: row.created_by as string | null,
+      creator_name: row.created_by ? (profileMap[row.created_by as string] ?? null) : null,
+      category_name: categories?.name ?? null,
+      category_icon: categories?.icon ?? null,
+    }
+  })
+
+  return { entries, error: null }
+}
