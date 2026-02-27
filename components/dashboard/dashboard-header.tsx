@@ -10,6 +10,7 @@ import {
   Button as HeroUIButton,
 } from "@heroui/react"
 import { cn } from "@/lib/utils"
+import { useExpense } from "@/contexts/expense-context"
 
 interface DashboardHeaderProps {
   onAddExpense: () => void
@@ -24,6 +25,8 @@ export function DashboardHeader({
   onAddBudget,
   onAddIncome,
 }: DashboardHeaderProps) {
+  const { searchQuery, setSearchQuery } = useExpense()
+
   const handleAction = (key: React.Key) => {
     if (key === "expense") onAddExpense()
     else if (key === "budget") onAddBudget()
@@ -50,13 +53,15 @@ export function DashboardHeader({
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none md:h-5 md:w-5" />
           <Input
             placeholder="Search transactions..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-44 sm:w-52 h-10 pl-9 rounded-lg border-input bg-muted/30 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
           <HeroUIButton
-            className="w-full sm:w-auto h-11 min-h-[44px] px-5 rounded-xl bg-primary text-primary-foreground font-medium text-sm shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2">
+            className="w-full sm:w-auto h-11 min-h-[44px] px-5 rounded-lg bg-primary text-primary-foreground font-medium text-sm shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2">
             <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>New Transaction</span>
           </HeroUIButton>

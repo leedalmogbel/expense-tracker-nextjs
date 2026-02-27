@@ -1,25 +1,34 @@
 "use client"
 
+import { memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { useExpense } from "@/contexts/expense-context"
+import { BarChart3 } from "lucide-react"
 
-export function AnalyticsBarChart() {
-  const { chartData7Months, currency, selectedMonthFilter, setSelectedMonthFilter, year, month } = useExpense()
+export const AnalyticsBarChart = memo(function AnalyticsBarChart() {
+  const { chartData7Months, currency, selectedMonthFilter, setSelectedMonthFilter, setSelectedDate, setDateRangeFilter, year, month } = useExpense()
   const currentMonthKey = `${year}-${month}`
 
   return (
-    <Card className="border-border">
-      <CardHeader className="p-4 pb-2 sm:p-6">
-        <CardTitle className="font-heading text-base font-semibold text-foreground">
-          Analytics
-        </CardTitle>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Last 7 months · Click a bar to filter transactions
-        </p>
+    <Card className="w-full border-border">
+      <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
+        <div className="flex items-center gap-3 w-full">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-4))]/10 text-[hsl(var(--chart-4))]">
+            <BarChart3 className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+              Analytics
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Last 7 months &middot; Click a bar to filter
+            </p>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-4 text-foreground">
-        <div className="h-[240px] sm:h-[280px] w-full min-w-0 text-muted-foreground [color:hsl(var(--muted-foreground))]">
+        <div className="h-[240px] sm:h-[280px] w-full min-w-0 text-muted-foreground">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData7Months}
@@ -27,11 +36,10 @@ export function AnalyticsBarChart() {
               onClick={(state) => {
                 if (state?.activePayload?.[0]?.payload) {
                   const { year: y, monthNum: m } = state.activePayload[0].payload
-                  setSelectedMonthFilter(
-                    selectedMonthFilter?.year === y && selectedMonthFilter?.month === m
-                      ? null
-                      : { year: y, month: m }
-                  )
+                  const isAlreadySelected = selectedMonthFilter?.year === y && selectedMonthFilter?.month === m
+                  setSelectedDate(null)
+                  setDateRangeFilter(null)
+                  setSelectedMonthFilter(isAlreadySelected ? null : { year: y, month: m })
                 }
               }}
             >
@@ -104,4 +112,4 @@ export function AnalyticsBarChart() {
       </CardContent>
     </Card>
   )
-}
+})

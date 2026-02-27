@@ -16,7 +16,10 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectItem } from "@/components/ui/select"
 import { useExpense } from "@/contexts/expense-context"
+import { useAuth } from "@/contexts/auth-context"
+import { syncSingleTransaction } from "@/lib/supabase-api"
 import { CATEGORIES, CATEGORY_ICONS, getCategoryLabel } from "@/lib/constants"
+import { toast } from "sonner"
 
 function normalizePaymentKey(m: string) {
   return m.toLowerCase().replace(/\s+/g, "-")
@@ -31,6 +34,7 @@ interface AddExpenseModalProps {
 
 export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
   const { addTransaction, paymentMethods, currency } = useExpense()
+  const { user, isSupabaseConfigured } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [category, setCategory] = useState<string>("")
   const [paymentMethod, setPaymentMethod] = useState<string>("Other")
@@ -57,7 +61,7 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
     const icon = CATEGORY_ICONS[categoryLabel] ?? "circle-dot"
 
     setIsSubmitting(true)
-    addTransaction({
+    const newTx = addTransaction({
       description: notes ? `${description} (${notes})` : description,
       category: categoryLabel,
       amount,
@@ -66,6 +70,10 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
       isPositive: false,
       paymentMethod: paymentMethod || "Other",
     })
+    toast.success("Expense added", { description: `${description} for ${currency.symbol}${amountNum.toFixed(2)}` })
+    if (user && isSupabaseConfigured) {
+      syncSingleTransaction(user.id, newTx).catch(() => {})
+    }
     setIsSubmitting(false)
     onOpenChange(false)
     setCategory("")

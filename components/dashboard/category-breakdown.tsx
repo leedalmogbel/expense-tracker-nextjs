@@ -1,34 +1,52 @@
 "use client"
 
+import { memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart as PieChartIcon } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { useExpense } from "@/contexts/expense-context"
 
-export function CategoryBreakdown() {
+export const CategoryBreakdown = memo(function CategoryBreakdown() {
   const { categoryBreakdown, currency } = useExpense()
   const total = categoryBreakdown.reduce((sum, item) => sum + item.value, 0)
 
   if (categoryBreakdown.length === 0) {
     return (
-      <Card className="border-border text-card-foreground">
-        <CardHeader className="p-4 pb-2 sm:p-6">
-          <CardTitle className="font-heading text-base font-semibold text-foreground">
-            Spending by Category
-          </CardTitle>
+      <Card className="w-full border-border text-card-foreground">
+        <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+              <PieChartIcon className="h-5 w-5" />
+            </div>
+            <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+              Spending by Category
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
-          <p className="text-sm text-muted-foreground">Add expenses to see spending by category.</p>
+          <div className="py-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-3">
+              <PieChartIcon className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">No data yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Add expenses to see spending by category</p>
+          </div>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="border-border">
-      <CardHeader className="p-4 pb-2 sm:p-6">
-        <CardTitle className="font-heading text-base font-semibold text-foreground">
-          Spending by Category
-        </CardTitle>
+    <Card className="w-full border-border">
+      <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
+        <div className="flex items-center gap-3 w-full">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+            <PieChartIcon className="h-5 w-5" />
+          </div>
+          <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+            Spending by Category
+          </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 pt-0">
         <div className="flex flex-col items-center gap-4 sm:gap-6 lg:flex-row">
@@ -99,4 +117,4 @@ export function CategoryBreakdown() {
       </CardContent>
     </Card>
   )
-}
+})

@@ -11,18 +11,27 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { useExpense } from "@/contexts/expense-context"
+import { TrendingUp } from "lucide-react"
 
 export function SpendingChart() {
   const { chartData, currency } = useExpense()
 
   return (
-    <Card className="border-border">
-      <CardHeader className="p-4 pb-2 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="font-heading text-base font-semibold text-foreground">
-            Income vs Expenses
-          </CardTitle>
-          <div className="flex gap-3 sm:gap-4 text-xs">
+    <Card className="w-full border-border">
+      <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
+        <div className="flex flex-wrap items-start justify-between gap-3 w-full">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <TrendingUp className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                Income vs Expenses
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">Last 12 months</p>
+            </div>
+          </div>
+          <div className="flex gap-3 sm:gap-4 text-xs shrink-0 pt-1">
             <div className="flex items-center gap-1.5">
               <div className="h-2.5 w-2.5 rounded-full bg-primary" />
               <span className="text-muted-foreground">Income</span>

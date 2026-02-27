@@ -12,7 +12,9 @@ import {
   Button as HeroUIButton,
 } from "@heroui/react"
 import { useDashboardActions } from "@/contexts/dashboard-actions-context"
+import { useExpense } from "@/contexts/expense-context"
 import { useTheme } from "next-themes"
+import { useRef, useEffect } from "react"
 
 interface DashboardTopbarProps {
   /** Unread notification count */
@@ -21,9 +23,22 @@ interface DashboardTopbarProps {
 
 export function DashboardTopbar({ notificationCount = 3 }: DashboardTopbarProps) {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
+  const { searchQuery, setSearchQuery } = useExpense()
   const { theme, setTheme } = useTheme()
+  const searchRef = useRef<HTMLInputElement>(null)
   const hasNotifications = notificationCount > 0
   const badgeLabel = notificationCount >= 10 ? "9+" : String(notificationCount)
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    document.addEventListener("keydown", handler)
+    return () => document.removeEventListener("keydown", handler)
+  }, [])
 
   const handleAction = (key: React.Key) => {
     if (key === "expense") openAddExpenseRef.current?.()
@@ -32,11 +47,14 @@ export function DashboardTopbar({ notificationCount = 3 }: DashboardTopbarProps)
   }
 
   return (
-    <header className="z-30 hidden h-16 w-full shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-6 shadow-sm lg:flex">
+    <header className="z-30 hidden h-16 w-full shrink-0 items-center justify-between gap-4 border-b border-border bg-background/80 backdrop-blur-xl px-6 shadow-sm lg:flex dark:bg-background/60 dark:border-white/[0.06]">
       <div className="relative w-full max-w-sm shrink-0">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none lg:h-5 lg:w-5" />
         <Input
+          ref={searchRef}
           placeholder="Search transactions..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="h-10 w-full pl-9 pr-8 rounded-lg border-border bg-muted/30 text-sm focus-visible:ring-2 focus-visible:ring-primary/20"
         />
         <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-block">

@@ -1,10 +1,12 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { SpendingChart } from "@/components/dashboard/spending-chart"
 import { AnalyticsBarChart } from "@/components/dashboard/analytics-bar-chart"
 import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
 import { useDashboardActions } from "@/contexts/dashboard-actions-context"
+import { staggerContainer, fadeUpItem } from "@/lib/utils"
 
 export default function AnalyticsPage() {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
@@ -20,15 +22,22 @@ export default function AnalyticsPage() {
         Income vs expenses over time and spending by category.
       </p>
 
-      <div className="mt-8 space-y-6">
-        <div className="grid gap-6 lg:grid-cols-3">
+      <motion.div
+        className="mt-8 space-y-6"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={fadeUpItem} className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <SpendingChart />
           </div>
           <CategoryBreakdown />
-        </div>
-        <AnalyticsBarChart />
-      </div>
+        </motion.div>
+        <motion.div variants={fadeUpItem}>
+          <AnalyticsBarChart />
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

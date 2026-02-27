@@ -1,22 +1,13 @@
 "use client"
 
-import { useEffect } from "react"
 import { motion } from "framer-motion"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { AnalyticsBarChart } from "@/components/dashboard/analytics-bar-chart"
-import { RecentTransactions } from "@/components/dashboard/recent-transactions"
+import { ShoppingTripsView } from "@/components/dashboard/shopping-trips-view"
 import { useDashboardActions } from "@/contexts/dashboard-actions-context"
-import { useExpense } from "@/contexts/expense-context"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 
-export default function TransactionsPage() {
+export default function ShoppingTripsPage() {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
-  const { setSelectedDate } = useExpense()
-
-  // Clear day-specific filter on mount so full month view shows by default
-  useEffect(() => {
-    setSelectedDate(null)
-  }, [setSelectedDate])
 
   return (
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
@@ -25,9 +16,6 @@ export default function TransactionsPage() {
         onAddBudget={() => openAddBudgetRef.current?.()}
         onAddIncome={() => openAddIncomeRef.current?.()}
       />
-      <p className="mt-1 text-sm text-muted-foreground">
-        Filter by month, date range, or category. Click a chart bar or use the filters below.
-      </p>
 
       <motion.div
         className="mt-8 space-y-6"
@@ -36,10 +24,7 @@ export default function TransactionsPage() {
         animate="visible"
       >
         <motion.div variants={fadeUpItem}>
-          <AnalyticsBarChart />
-        </motion.div>
-        <motion.div variants={fadeUpItem}>
-          <RecentTransactions />
+          <ShoppingTripsView />
         </motion.div>
       </motion.div>
     </div>

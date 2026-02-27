@@ -1,12 +1,33 @@
 "use client"
 
-import Link from "next/link"
-import { Menu, Bell, Settings, Plus, Moon, Sun } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Bell, Moon, Sun, Settings, User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useSidebar } from "@/contexts/sidebar-context"
-import { useDashboardActions } from "@/contexts/dashboard-actions-context"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
+import { useAuth } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/react"
+
+function getUserDisplayName(email: string | undefined, metadata?: { full_name?: string; name?: string } | null): string {
+  if (metadata?.full_name?.trim()) return metadata.full_name.trim()
+  if (metadata?.name?.trim()) return metadata.name.trim()
+  if (email) return email.split("@")[0]
+  return "Account"
+}
+
+function getInitials(displayName: string, email: string | undefined): string {
+  const parts = displayName.trim().split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase().slice(0, 2)
+  if (displayName.length >= 2) return displayName.slice(0, 2).toUpperCase()
+  if (email) return email[0].toUpperCase()
+  return "?"
+}
 
 interface DashboardMobileHeaderProps {
   /** Unread notification count; 0 = no badge */
@@ -14,11 +35,14 @@ interface DashboardMobileHeaderProps {
 }
 
 export function DashboardMobileHeader({ notificationCount = 3 }: DashboardMobileHeaderProps) {
-  const { setMobileOpen } = useSidebar()
-  const { openAddModalRef } = useDashboardActions()
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
+  const { user, signOut } = useAuth()
   const hasNotifications = notificationCount > 0
   const badgeLabel = notificationCount >= 10 ? "9+" : String(notificationCount)
+
+  const displayName = getUserDisplayName(user?.email, user?.user_metadata)
+  const initials = getInitials(displayName, user?.email)
 
   return (
     <header
@@ -26,17 +50,7 @@ export function DashboardMobileHeader({ notificationCount = 3 }: DashboardMobile
         "sticky top-0 z-10 flex h-14 min-h-14 items-center gap-2 border-b border-border bg-background px-3 py-2 shadow-sm sm:px-4 lg:hidden"
       )}
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-11 w-11 min-h-11 min-w-11 shrink-0 rounded-xl touch-manipulation"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open menu"
-      >
-        <Menu className="h-6 w-6 text-foreground" aria-hidden />
-      </Button>
-
-      <div className="flex-1 min-w-0" aria-hidden>
+      <div className="flex-1 min-w-0">
         <span className="truncate text-base font-semibold text-foreground sm:text-sm">Dosh Mate</span>
       </div>
 
@@ -44,7 +58,7 @@ export function DashboardMobileHeader({ notificationCount = 3 }: DashboardMobile
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-13 w-13 min-h-11 min-w-11 rounded-xl touch-manipulation"
+          className="relative h-13 w-13 min-h-11 min-w-11 rounded-lg touch-manipulation active:scale-95"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           aria-label="Toggle theme"
         >
@@ -55,7 +69,7 @@ export function DashboardMobileHeader({ notificationCount = 3 }: DashboardMobile
           <Button
             variant="ghost"
             size="icon"
-            className="h-13 w-13 min-h-11 min-w-11 rounded-xl touch-manipulation"
+            className="h-13 w-13 min-h-11 min-w-11 rounded-lg touch-manipulation active:scale-95"
             aria-label={hasNotifications ? `${notificationCount} unread notifications` : "Notifications"}
           >
             <Bell className="h-6 w-6 px-0" />
@@ -69,19 +83,56 @@ export function DashboardMobileHeader({ notificationCount = 3 }: DashboardMobile
             </span>
           )}
         </span>
-        {/* <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg" asChild>
-          <Link href="/dashboard/settings" aria-label="Settings">
-            <Settings className="h-5 w-5 text-foreground" />
-          </Link>
-        </Button>
-        <Button
-          size="default"
-          className="h-9 gap-1.5 rounded-lg px-3 text-sm font-medium"
-          onClick={() => openAddModalRef.current?.()}
-        >
-          <Plus className="h-4 w-4" />
-          Add
-        </Button> */}
+
+        {/* User avatar dropdown */}
+        <Dropdown placement="bottom-end">
+          <DropdownTrigger>
+            <button
+              type="button"
+              className="flex h-11 w-11 min-h-11 min-w-11 items-center justify-center rounded-lg touch-manipulation active:scale-95"
+              aria-label="User menu"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownTrigger>
+          <DropdownMenu
+            aria-label="User menu"
+            className="min-w-[12rem] bg-content1 rounded-xl shadow-lg p-2"
+          >
+            <DropdownItem
+              key="settings"
+              startContent={<Settings className="h-4 w-4 shrink-0" />}
+              onPress={() => router.push("/dashboard/settings")}
+              className="py-2"
+            >
+              Settings
+            </DropdownItem>
+            <DropdownItem
+              key="profile"
+              startContent={<User className="h-4 w-4 shrink-0" />}
+              onPress={() => router.push("/dashboard/settings")}
+              className="py-2"
+            >
+              Profile
+            </DropdownItem>
+            <DropdownItem
+              key="logout"
+              startContent={<LogOut className="h-4 w-4 shrink-0" />}
+              onPress={async () => {
+                await signOut()
+                router.push("/login")
+              }}
+              className="py-2 text-destructive"
+              color="danger"
+            >
+              Log out
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       </div>
     </header>
   )

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useExpense } from "@/contexts/expense-context"
 import { getCategoryIconComponent } from "@/lib/category-icons"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const CHART_COLORS = [
@@ -36,7 +36,13 @@ export function OverviewRecent() {
       </CardHeader>
       <CardContent className="px-4 pt-0 pb-4 sm:px-6 sm:pb-6">
         {recent.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">No transactions yet. Add one to get started.</p>
+          <div className="py-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-3">
+              <Wallet className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">No transactions yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Add one to get started</p>
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {recent.map((tx, i) => {

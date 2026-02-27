@@ -1,9 +1,11 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { BudgetExpenseCards } from "@/components/dashboard/budget-expense-cards"
 import { BudgetProgress } from "@/components/dashboard/budget-progress"
 import { useDashboardActions } from "@/contexts/dashboard-actions-context"
+import { staggerContainer, fadeUpItem } from "@/lib/utils"
 
 export default function BudgetsPage() {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
@@ -19,10 +21,19 @@ export default function BudgetsPage() {
         Set a monthly budget and track spending by category.
       </p>
 
-      <div className="mt-8 space-y-6">
-        <BudgetExpenseCards />
-        <BudgetProgress onManage={() => openAddBudgetRef.current?.()} />
-      </div>
+      <motion.div
+        className="mt-8 space-y-6"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={fadeUpItem}>
+          <BudgetExpenseCards />
+        </motion.div>
+        <motion.div variants={fadeUpItem}>
+          <BudgetProgress onManage={() => openAddBudgetRef.current?.()} />
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

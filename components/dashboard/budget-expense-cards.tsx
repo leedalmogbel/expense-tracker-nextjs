@@ -18,15 +18,17 @@ export function BudgetExpenseCards() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <Card className="border-border">
-        <CardContent className="p-4 sm:p-5">
+      <Card className="border-border relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent dark:from-primary/15 dark:via-primary/5 dark:to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <CardContent className="relative p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Budget / Month
             </span>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
+            <Wallet className="h-4 w-4 text-primary/60" />
           </div>
-          <p className="text-xl sm:text-2xl font-bold font-heading text-foreground">
+          <p className="text-xl sm:text-2xl font-bold font-heading text-foreground tracking-tight">
             {formatMoney(budgetTotal)}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
@@ -48,15 +50,16 @@ export function BudgetExpenseCards() {
           )}
         </CardContent>
       </Card>
-      <Card className="border-border">
-        <CardContent className="p-4 sm:p-5">
+      <Card className="border-border relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--chart-3))]/10 via-transparent to-transparent pointer-events-none" />
+        <CardContent className="relative p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Spent Today
             </span>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-4 w-4 text-[hsl(var(--chart-3))]/60" />
           </div>
-          <p className="text-xl sm:text-2xl font-bold font-heading text-foreground">
+          <p className="text-xl sm:text-2xl font-bold font-heading text-foreground tracking-tight">
             {formatMoney(spentToday)}
           </p>
           <p className="text-sm text-muted-foreground mt-1">

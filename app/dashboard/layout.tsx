@@ -3,6 +3,8 @@ import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { DashboardContent } from "@/components/dashboard/dashboard-content"
 import { SidebarProvider } from "@/contexts/sidebar-context"
 import { DashboardActionsProvider } from "@/contexts/dashboard-actions-context"
+import { DashboardAuthGuard } from "@/components/auth/dashboard-auth-guard"
+import { LoadCloudData } from "@/components/auth/load-cloud-data"
 
 export const metadata: Metadata = {
   title: "Dashboard - Dosh Mate",
@@ -15,13 +17,16 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-screen bg-background">
-      <SidebarProvider>
-        <DashboardActionsProvider>
-          <DashboardSidebar />
-          <DashboardContent>{children}</DashboardContent>
-        </DashboardActionsProvider>
-      </SidebarProvider>
-    </div>
+    <DashboardAuthGuard>
+      <LoadCloudData />
+      <div className="flex min-h-screen bg-background">
+        <SidebarProvider>
+          <DashboardActionsProvider>
+            <DashboardSidebar />
+            <DashboardContent>{children}</DashboardContent>
+          </DashboardActionsProvider>
+        </SidebarProvider>
+      </div>
+    </DashboardAuthGuard>
   )
 }

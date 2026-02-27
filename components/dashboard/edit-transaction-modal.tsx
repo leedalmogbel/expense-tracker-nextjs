@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectItem } from "@/components/ui/select"
 import { useExpense } from "@/contexts/expense-context"
-import { CATEGORIES, CATEGORY_ICONS, getCategoryLabel } from "@/lib/constants"
+import { useAuth } from "@/contexts/auth-context"
+import { syncSingleTransaction } from "@/lib/supabase-api"
+import { CATEGORIES, CATEGORY_ICONS, getCategoryLabel, INCOME_CATEGORIES, INCOME_CATEGORY_ICONS } from "@/lib/constants"
+import { toast } from "sonner"
 import { getMonthName } from "@/lib/expense-utils"
 import type { Transaction } from "@/lib/types"
 
@@ -37,6 +40,7 @@ interface EditTransactionModalProps {
 
 export function EditTransactionModal({ open, onOpenChange, transaction }: EditTransactionModalProps) {
   const { updateTransactionById, paymentMethods, currency } = useExpense()
+  const { user, isSupabaseConfigured } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Expense form state
@@ -49,6 +53,9 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
 
   // Income form state
   const [incomeAmount, setIncomeAmount] = useState("")
+  const [incomeDescription, setIncomeDescription] = useState("")
+  const [incomeCategory, setIncomeCategory] = useState("Salary")
+  const [incomePaymentMethod, setIncomePaymentMethod] = useState("Bank Transfer")
   const [month, setMonth] = useState(new Date().getMonth() + 1)
   const [year, setYear] = useState(new Date().getFullYear())
 
@@ -72,6 +79,11 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
         setPaymentMethod(transaction.paymentMethod || "Other")
       } else {
         setIncomeAmount(Math.abs(transaction.amount).toFixed(2))
+        setIncomeCategory(transaction.category || "Salary")
+        setIncomePaymentMethod(transaction.paymentMethod || "Bank Transfer")
+        // Parse description: strip "(Month Year)" suffix if present
+        const descMatch = transaction.description.match(/^(.+?)\s*\([^)]+\)\s*$/)
+        setIncomeDescription(descMatch ? descMatch[1].trim() : "")
         const [y, m] = transaction.date.split("-").map(Number)
         if (y && m) {
           setYear(y)
@@ -91,14 +103,19 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
     const finalDescription = notes ? `${description.trim()} (${notes})` : description.trim()
 
     setIsSubmitting(true)
-    updateTransactionById(transaction.id, {
+    const expenseUpdates = {
       description: finalDescription || transaction.description,
       category: categoryLabel,
       amount: -Math.abs(amountNum),
       icon,
       date: dateValue,
       paymentMethod: paymentMethod || "Other",
-    })
+    }
+    updateTransactionById(transaction.id, expenseUpdates)
+    toast.success("Expense updated")
+    if (user && isSupabaseConfigured) {
+      syncSingleTransaction(user.id, { ...transaction, ...expenseUpdates }).catch(() => {})
+    }
     setIsSubmitting(false)
     onOpenChange(false)
   }
@@ -110,17 +127,24 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
     if (amountNum <= 0) return
     const monthName = getMonthName(month)
     const date = `${year}-${String(month).padStart(2, "0")}-01`
-    const finalDescription = `Income - ${monthName} ${year}`
+    const finalDescription = incomeDescription.trim()
+      ? `${incomeDescription.trim()} (${monthName} ${year})`
+      : `${incomeCategory} - ${monthName} ${year}`
 
     setIsSubmitting(true)
-    updateTransactionById(transaction.id, {
+    const incomeUpdates = {
       description: finalDescription,
-      category: "Other",
+      category: incomeCategory,
       amount: Math.abs(amountNum),
-      icon: "circle-dot",
+      icon: INCOME_CATEGORY_ICONS[incomeCategory] ?? "circle-dot",
       date,
-      paymentMethod: "Bank Transfer",
-    })
+      paymentMethod: incomePaymentMethod,
+    }
+    updateTransactionById(transaction.id, incomeUpdates)
+    toast.success("Income updated")
+    if (user && isSupabaseConfigured) {
+      syncSingleTransaction(user.id, { ...transaction, ...incomeUpdates }).catch(() => {})
+    }
     setIsSubmitting(false)
     onOpenChange(false)
   }
@@ -284,6 +308,19 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
             <form onSubmit={handleIncomeSubmit} id="edit-income-form" className="px-6 pb-6">
               <div className="space-y-5 pt-2">
                 <div className="space-y-2">
+                  <Label htmlFor="edit-income-desc" className="text-sm font-medium text-foreground">
+                    Source / description
+                  </Label>
+                  <Input
+                    id="edit-income-desc"
+                    type="text"
+                    placeholder="e.g. Company name, client"
+                    className={inputClass}
+                    value={incomeDescription}
+                    onChange={(e) => setIncomeDescription(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="edit-income-amount" className="text-sm font-medium text-foreground">
                     Amount received ({currency.code})
                   </Label>
@@ -302,6 +339,46 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
                       className={`pl-8 ${inputClass}`}
                       required
                     />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">Category</Label>
+                    <Select
+                      placeholder="Select category"
+                      classNames={{ trigger: inputClass }}
+                      selectedKeys={[normalizePaymentKey(incomeCategory)]}
+                      onSelectionChange={(keys) => {
+                        const v = Array.from(keys)[0]
+                        if (typeof v === "string") {
+                          const label = INCOME_CATEGORIES.find((c) => normalizePaymentKey(c) === v)
+                          if (label) setIncomeCategory(label)
+                        }
+                      }}
+                    >
+                      {INCOME_CATEGORIES.map((c) => (
+                        <SelectItem key={normalizePaymentKey(c)}>{c}</SelectItem>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">Payment method</Label>
+                    <Select
+                      placeholder="How received?"
+                      classNames={{ trigger: inputClass }}
+                      selectedKeys={incomePaymentMethod ? [normalizePaymentKey(incomePaymentMethod)] : []}
+                      onSelectionChange={(keys) => {
+                        const v = Array.from(keys)[0]
+                        if (typeof v === "string") {
+                          const label = paymentMethods.find((m) => normalizePaymentKey(m) === v)
+                          setIncomePaymentMethod(label ?? v)
+                        }
+                      }}
+                    >
+                      {paymentMethods.map((m) => (
+                        <SelectItem key={normalizePaymentKey(m)}>{m}</SelectItem>
+                      ))}
+                    </Select>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -333,7 +410,7 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
                       }}
                     >
                       {YEARS.map((y) => (
-                        <SelectItem key={String(y)}>{y}</SelectItem>
+                        <SelectItem key={String(y)}>{String(y)}</SelectItem>
                       ))}
                     </Select>
                   </div>

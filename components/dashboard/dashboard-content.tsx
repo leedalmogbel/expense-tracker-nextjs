@@ -9,6 +9,9 @@ import { AddExpenseModal } from "@/components/dashboard/add-expense-modal"
 import { AddBudgetModal } from "@/components/dashboard/add-budget-modal"
 import { AddIncomeModal } from "@/components/dashboard/add-income-modal"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import { getCreditCardReminders } from "@/lib/storage"
+import { getDueReminders } from "@/lib/expense-utils"
 
 /**
  * App shell content area: flex layout with spacer (no margin) so content is flush with sidebar.
@@ -20,6 +23,20 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
   const [addExpenseOpen, setAddExpenseOpen] = useState(false)
   const [addBudgetOpen, setAddBudgetOpen] = useState(false)
   const [addIncomeOpen, setAddIncomeOpen] = useState(false)
+
+  useEffect(() => {
+    const reminders = getCreditCardReminders()
+    const due = getDueReminders(reminders)
+    if (due.length > 0) {
+      toast.warning(
+        `Credit card payment${due.length > 1 ? "s" : ""} due soon`,
+        {
+          description: due.map((c) => c.name).join(", "),
+          duration: 8000,
+        }
+      )
+    }
+  }, [])
 
   useEffect(() => {
     openAddModalRef.current = (type) => {
@@ -49,7 +66,7 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <DashboardTopbar />
-        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-8 lg:px-6">
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-20 lg:pb-8 lg:px-6">
           <DashboardMobileHeader />
           {children}
         </main>
