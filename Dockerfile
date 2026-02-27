@@ -1,7 +1,7 @@
 # ============================================================
 # Stage 0: base -- shared Node + pnpm layer
 # ============================================================
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
@@ -36,7 +36,7 @@ RUN pnpm build
 # ============================================================
 # Stage 3: runner -- minimal production image
 # ============================================================
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
