@@ -14,9 +14,16 @@ export async function GET(request: Request) {
     ? `${forwardedProto}://${forwardedHost}`
     : origin
 
+  console.log("[auth/callback] code:", code, "baseUrl:", baseUrl, "origin:", origin)
+  console.log("[auth/callback] forwardedHost:", forwardedHost, "forwardedProto:", forwardedProto)
+  console.log("[auth/callback] cookies:", request.headers.get("cookie"))
+
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) {
+      console.error("[auth/callback] exchangeCodeForSession error:", error.message)
+    }
     if (!error) {
       return NextResponse.redirect(`${baseUrl}${nextPath}`)
     }
