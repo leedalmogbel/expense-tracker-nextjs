@@ -12,6 +12,7 @@
     "@heroui/react": "^2.4.8",
     "@hookform/resolvers": "^3.9.1",
     "@internationalized/date": "3.10.1",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.47.10",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",

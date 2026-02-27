@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -14,87 +10,83 @@ body {
 
 @layer base {
   :root {
-    /* Warm paper-like background, easy on the eye */
-    --background: 42 22% 97%;
-    --foreground: 220 18% 14%;
+    --background: 220 16% 96%;
+    --foreground: 224 32% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 220 18% 14%;
+    --card-foreground: 224 32% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 18% 14%;
-    /* Sage green – budgeting / income / trust */
-    --primary: 158 36% 36%;
+    --popover-foreground: 224 32% 10%;
+    --primary: 158 64% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 42 18% 93%;
-    --secondary-foreground: 220 12% 18%;
-    --muted: 42 16% 94%;
-    --muted-foreground: 220 10% 44%;
-    --accent: 158 28% 92%;
-    --accent-foreground: 158 36% 26%;
-    /* Clear expense / over-budget red */
-    --destructive: 0 65% 48%;
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 224 24% 18%;
+    --muted: 220 12% 94%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 158 18% 91%;
+    --accent-foreground: 158 52% 24%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 14% 90%;
-    --input: 40 14% 90%;
-    --ring: 158 36% 36%;
-    /* Charts: income green, expense red, categories */
-    --chart-1: 158 36% 40%;
-    --chart-2: 199 55% 48%;
-    --chart-3: 38 72% 52%;
-    --chart-4: 0 65% 48%;
-    --chart-5: 262 48% 52%;
-    --radius: 0.625rem;
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 158 64% 32%;
+    --chart-1: 158 64% 32%;
+    --chart-2: 213 72% 48%;
+    --chart-3: 43 96% 50%;
+    --chart-4: 350 70% 55%;
+    --chart-5: 270 56% 54%;
+    --radius: 0.75rem;
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 18% 14%;
-    --sidebar-primary: 158 36% 36%;
+    --sidebar-foreground: 224 32% 10%;
+    --sidebar-primary: 158 64% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 158 28% 92%;
-    --sidebar-accent-foreground: 158 36% 26%;
-    --sidebar-border: 40 14% 90%;
-    --sidebar-ring: 158 36% 36%;
-    --success: 158 36% 38%;
+    --sidebar-accent: 158 18% 91%;
+    --sidebar-accent-foreground: 158 52% 24%;
+    --sidebar-border: 220 13% 90%;
+    --sidebar-ring: 158 64% 32%;
+    --success: 158 58% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 72% 48%;
-    --warning-foreground: 220 18% 14%;
+    --warning: 43 96% 50%;
+    --warning-foreground: 224 32% 10%;
   }
 
   .dark {
-    /* Deep slate, not pure black */
-    --background: 222 20% 9%;
-    --foreground: 42 12% 94%;
-    --card: 222 18% 12%;
-    --card-foreground: 42 12% 94%;
-    --popover: 222 18% 12%;
-    --popover-foreground: 42 12% 94%;
-    --primary: 158 38% 44%;
-    --primary-foreground: 220 20% 10%;
-    --secondary: 222 14% 15%;
-    --secondary-foreground: 42 10% 88%;
-    --muted: 222 14% 15%;
-    --muted-foreground: 220 10% 52%;
-    --accent: 158 25% 18%;
-    --accent-foreground: 158 38% 58%;
-    --destructive: 0 58% 46%;
+    --background: 228 24% 6%;
+    --foreground: 216 18% 93%;
+    --card: 225 20% 9%;
+    --card-foreground: 216 18% 93%;
+    --popover: 225 20% 11%;
+    --popover-foreground: 216 18% 93%;
+    --primary: 158 62% 46%;
+    --primary-foreground: 228 28% 4%;
+    --secondary: 224 18% 12%;
+    --secondary-foreground: 216 14% 86%;
+    --muted: 224 16% 13%;
+    --muted-foreground: 218 10% 52%;
+    --accent: 158 16% 11%;
+    --accent-foreground: 158 52% 56%;
+    --destructive: 0 68% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 14% 18%;
-    --input: 222 14% 18%;
-    --ring: 158 38% 44%;
-    --chart-1: 158 38% 48%;
-    --chart-2: 199 55% 55%;
-    --chart-3: 38 70% 58%;
-    --chart-4: 0 58% 52%;
-    --chart-5: 262 48% 58%;
-    --sidebar-background: 222 20% 10%;
-    --sidebar-foreground: 42 12% 94%;
-    --sidebar-primary: 158 38% 44%;
-    --sidebar-primary-foreground: 220 20% 10%;
-    --sidebar-accent: 158 25% 18%;
-    --sidebar-accent-foreground: 158 38% 58%;
-    --sidebar-border: 222 14% 18%;
-    --sidebar-ring: 158 38% 44%;
-    --success: 158 38% 46%;
-    --success-foreground: 220 20% 10%;
-    --warning: 38 70% 52%;
-    --warning-foreground: 222 20% 9%;
+    --border: 224 16% 15%;
+    --input: 224 16% 15%;
+    --ring: 158 62% 46%;
+    --chart-1: 158 62% 46%;
+    --chart-2: 213 76% 56%;
+    --chart-3: 43 98% 56%;
+    --chart-4: 350 76% 60%;
+    --chart-5: 270 62% 62%;
+    --radius: 0.75rem;
+    --sidebar-background: 228 24% 4%;
+    --sidebar-foreground: 216 18% 93%;
+    --sidebar-primary: 158 62% 46%;
+    --sidebar-primary-foreground: 228 28% 4%;
+    --sidebar-accent: 158 16% 8%;
+    --sidebar-accent-foreground: 158 52% 56%;
+    --sidebar-border: 224 16% 13%;
+    --sidebar-ring: 158 62% 46%;
+    --success: 158 60% 44%;
+    --success-foreground: 228 28% 4%;
+    --warning: 43 98% 56%;
+    --warning-foreground: 228 28% 4%;
   }
 }
 
@@ -108,14 +100,14 @@ body {
   }
 }
 
-/* Week calendar: selected date gets primary highlight (library or our fallback) */
-.week-calendar-root [data-selected="true"],
-.week-calendar-root .calendar-selected-by-date {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-/* Today: subtle ring when not selected so it’s still visible */
-.week-calendar-root [data-today="true"]:not([data-selected="true"]):not(.calendar-selected-by-date) {
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.5);
+
+/* Premium noise texture for dark mode depth */
+.dark body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox=’0 0 256 256’ xmlns=’http://www.w3.org/2000/svg’%3E%3Cfilter id=’noise’%3E%3CfeTurbulence type=’fractalNoise’ baseFrequency=’0.65’ numOctaves=’3’ stitchTiles=’stitch’/%3E%3C/filter%3E%3Crect width=’100%25’ height=’100%25’ filter=’url(%23noise)’/%3E%3C/svg%3E");
+  pointer-events: none;
 }
