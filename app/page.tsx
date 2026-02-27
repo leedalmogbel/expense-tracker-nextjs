@@ -13,7 +13,7 @@ export default function LandingPage() {
         <Hero />
         <Features />
         <HowItWorks />
-        <Pricing />
+        {/* <Pricing /> */}
       </main>
       <Footer />
     </div>
