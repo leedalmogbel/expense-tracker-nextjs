@@ -19,6 +19,7 @@ import {
 } from "@/lib/storage"
 import {
   getCurrentYearMonth,
+  getPreviousMonth,
   filterTransactionsByMonth,
   sumIncome,
   sumExpenses,
@@ -29,6 +30,10 @@ import {
   formatRelativeDate,
   getSpentToday,
   groupTransactionsByDate,
+  getIncomeTransactionsForMonth,
+  getIncomeChartData,
+  getAverageMonthlyIncome,
+  getIncomeByCategory,
 } from "@/lib/expense-utils"
 import { format } from "date-fns"
 import { CATEGORY_ICONS, PAYMENT_METHODS } from "@/lib/constants"
@@ -56,6 +61,8 @@ type ExpenseContextValue = {
   setSelectedDate: (v: string | null) => void
   selectedCategoryFilter: string | null
   setSelectedCategoryFilter: (v: string | null) => void
+  dateRangeFilter: { start: string; end: string } | null
+  setDateRangeFilter: (v: { start: string; end: string } | null) => void
   filteredTransactions: Transaction[]
   groupedTransactions: { dateLabel: string; dateKey: string; transactions: Transaction[] }[]
   addTransaction: (tx: Omit<Transaction, "id" | "createdAt" | "updatedAt">) => Transaction
@@ -66,10 +73,17 @@ type ExpenseContextValue = {
   formatRelativeDate: (dateStr: string) => string
   formatCurrency: (amount: number) => string
   setCurrency: (currency: Currency) => void
+  prevMonthIncome: number
+  prevMonthExpenses: number
+  searchQuery: string
+  setSearchQuery: (q: string) => void
   paymentMethods: string[]
-  customPaymentMethods: string[]
   addPaymentMethod: (name: string) => void
   removePaymentMethod: (name: string) => void
+  incomeTransactions: Transaction[]
+  incomeChartData: { month: string; monthKey: string; year: number; monthNum: number; income: number }[]
+  averageMonthlyIncome: number
+  incomeByCategoryData: { category: string; amount: number }[]
 }
 
 const ExpenseContext = React.createContext<ExpenseContextValue | null>(null)
@@ -95,31 +109,44 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     storageSetCurrency(c)
     setCurrencyState(c)
   }, [])
-  const defaultPaymentMethods = React.useMemo(() => [...PAYMENT_METHODS], [])
-  const [customPaymentMethods, setCustomPaymentMethods] = React.useState<string[]>(() => getStoredPaymentMethods())
-  const paymentMethods = React.useMemo(
-    () => [...defaultPaymentMethods, ...customPaymentMethods.filter((m) => !defaultPaymentMethods.includes(m))],
-    [defaultPaymentMethods, customPaymentMethods]
-  )
+  const [paymentMethods, setPaymentMethodsState] = React.useState<string[]>(() => {
+    const stored = getStoredPaymentMethods()
+    const defaults = [...PAYMENT_METHODS]
+    if (stored.length === 0) {
+      storageSetPaymentMethods(defaults)
+      return defaults
+    }
+    const hasAllDefaults = defaults.every((d) => stored.includes(d))
+    if (!hasAllDefaults) {
+      const merged = [...new Set([...defaults, ...stored])]
+      storageSetPaymentMethods(merged)
+      return merged
+    }
+    return stored
+  })
   const addPaymentMethod = React.useCallback((name: string) => {
     const trimmed = name.trim()
     if (!trimmed) return
-    const current = getStoredPaymentMethods()
-    if (current.includes(trimmed)) return
-    const next = [...current, trimmed]
-    storageSetPaymentMethods(next)
-    setCustomPaymentMethods(next)
+    setPaymentMethodsState((prev) => {
+      if (prev.includes(trimmed)) return prev
+      const next = [...prev, trimmed]
+      storageSetPaymentMethods(next)
+      return next
+    })
   }, [])
   const removePaymentMethod = React.useCallback((name: string) => {
-    const current = getStoredPaymentMethods()
-    if (!current.includes(name)) return
-    const next = current.filter((m) => m !== name)
-    storageSetPaymentMethods(next)
-    setCustomPaymentMethods(next)
+    setPaymentMethodsState((prev) => {
+      const next = prev.filter((m) => m !== name)
+      if (next.length === 0) return prev
+      storageSetPaymentMethods(next)
+      return next
+    })
   }, [])
   const [selectedMonthFilter, setSelectedMonthFilter] = React.useState<MonthFilter>(null)
   const [selectedDate, setSelectedDate] = React.useState<string | null>(() => format(new Date(), "yyyy-MM-dd"))
   const [selectedCategoryFilter, setSelectedCategoryFilter] = React.useState<string | null>(null)
+  const [dateRangeFilter, setDateRangeFilter] = React.useState<{ start: string; end: string } | null>(null)
+  const [searchQuery, setSearchQuery] = React.useState("")
 
   const refresh = React.useCallback(() => {
     setTransactions(getTransactions())
@@ -139,6 +166,13 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   )
   const monthlyIncome = React.useMemo(() => sumIncome(currentMonthTransactions), [currentMonthTransactions])
   const monthlyExpenses = React.useMemo(() => sumExpenses(currentMonthTransactions), [currentMonthTransactions])
+  const prevMonth = React.useMemo(() => getPreviousMonth(year, month), [year, month])
+  const prevMonthTransactions = React.useMemo(
+    () => filterTransactionsByMonth(transactions, prevMonth.year, prevMonth.month),
+    [transactions, prevMonth.year, prevMonth.month]
+  )
+  const prevMonthIncome = React.useMemo(() => sumIncome(prevMonthTransactions), [prevMonthTransactions])
+  const prevMonthExpenses = React.useMemo(() => sumExpenses(prevMonthTransactions), [prevMonthTransactions])
   const totalBalance = React.useMemo(
     () => transactions.reduce((s, t) => s + t.amount, 0),
     [transactions]
@@ -163,9 +197,27 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     () => getBudgetProgress(transactions, currentBudget, year, month),
     [transactions, currentBudget, year, month]
   )
+  const incomeTransactions = React.useMemo(
+    () => getIncomeTransactionsForMonth(transactions, year, month),
+    [transactions, year, month]
+  )
+  const incomeChartData = React.useMemo(
+    () => getIncomeChartData(transactions, 7),
+    [transactions]
+  )
+  const averageMonthlyIncome = React.useMemo(
+    () => getAverageMonthlyIncome(transactions, 6),
+    [transactions]
+  )
+  const incomeByCategoryData = React.useMemo(
+    () => getIncomeByCategory(transactions, year, month),
+    [transactions, year, month]
+  )
   const filteredTransactions = React.useMemo(() => {
     let list: Transaction[]
-    if (selectedDate != null) {
+    if (dateRangeFilter) {
+      list = transactions.filter((t) => t.date >= dateRangeFilter.start && t.date <= dateRangeFilter.end)
+    } else if (selectedDate != null) {
       list = transactions.filter((t) => t.date === selectedDate)
     } else {
       list = filterTransactionsByMonth(transactions, filterYear, filterMonth)
@@ -174,8 +226,17 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
       const norm = selectedCategoryFilter.toLowerCase()
       list = list.filter((t) => normalizeCategory(t.category) === norm)
     }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase()
+      list = list.filter(
+        (t) =>
+          t.description.toLowerCase().includes(q) ||
+          t.category.toLowerCase().includes(q) ||
+          t.paymentMethod.toLowerCase().includes(q)
+      )
+    }
     return list.sort((a, b) => (b.date === a.date ? (b.updatedAt?.localeCompare(a.updatedAt) ?? 0) : b.date.localeCompare(a.date)))
-  }, [transactions, filterYear, filterMonth, selectedDate, selectedCategoryFilter])
+  }, [transactions, filterYear, filterMonth, selectedDate, selectedCategoryFilter, searchQuery, dateRangeFilter])
   const groupedTransactions = React.useMemo(
     () => groupTransactionsByDate(filteredTransactions, (dateStr) => formatRelativeDate(dateStr)),
     [filteredTransactions]
@@ -219,7 +280,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const value: ExpenseContextValue = {
+  const value: ExpenseContextValue = React.useMemo(() => ({
     transactions,
     currentBudget,
     currency,
@@ -240,6 +301,8 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     setSelectedDate,
     selectedCategoryFilter,
     setSelectedCategoryFilter,
+    dateRangeFilter,
+    setDateRangeFilter,
     filteredTransactions,
     groupedTransactions,
     addTransaction,
@@ -250,11 +313,29 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     formatRelativeDate,
     formatCurrency,
     setCurrency,
+    prevMonthIncome,
+    prevMonthExpenses,
+    searchQuery,
+    setSearchQuery,
     paymentMethods,
-    customPaymentMethods,
     addPaymentMethod,
     removePaymentMethod,
-  }
+    incomeTransactions,
+    incomeChartData,
+    averageMonthlyIncome,
+    incomeByCategoryData,
+  }), [
+    transactions, currentBudget, currency, year, month,
+    currentMonthTransactions, monthlyIncome, monthlyExpenses, totalBalance, spentToday,
+    chartData, chartData7Months, categoryBreakdown, budgetProgress,
+    selectedMonthFilter, selectedDate, selectedCategoryFilter, dateRangeFilter,
+    filteredTransactions, groupedTransactions,
+    addTransaction, updateTransactionById, deleteTransactionById, setCurrentBudget,
+    refresh, formatCurrency, setCurrency,
+    prevMonthIncome, prevMonthExpenses, searchQuery, paymentMethods,
+    addPaymentMethod, removePaymentMethod,
+    incomeTransactions, incomeChartData, averageMonthlyIncome, incomeByCategoryData,
+  ])
 
   return <ExpenseContext.Provider value={value}>{children}</ExpenseContext.Provider>
 }

@@ -6,17 +6,19 @@ import { Select as HeroUISelect } from "@heroui/react"
 import { cn } from "@/lib/utils"
 
 /**
- * Select – text on the left, default arrow on the right. Use SelectItem from this file as children.
+ * Select – full-width, properly styled trigger with rounded-lg borders.
  * @see https://www.heroui.com/docs/components/select
  */
 const selectTriggerClasses =
-  "h-10 min-h-10 rounded-md border border-border bg-background px-3 " +
+  "h-11 min-h-11 w-full rounded-lg border border-input bg-background px-3 " +
   "flex flex-row-reverse items-center gap-2 " +
-  "data-[hover=true]:bg-background data-[hover=true]:border-muted-foreground/30 " +
-  "group-data-[focus=true]:border-ring group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-ring/20 " +
-  "data-[open=true]:border-ring data-[open=true]:ring-2 data-[open=true]:ring-ring/20 transition-colors"
+  "text-sm font-medium text-foreground " +
+  "data-[hover=true]:bg-background data-[hover=true]:border-muted-foreground/40 " +
+  "group-data-[focus=true]:border-primary group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/20 " +
+  "data-[open=true]:border-primary data-[open=true]:ring-2 data-[open=true]:ring-primary/20 " +
+  "transition-all duration-150"
 
-/** Value text: left-aligned. flex-row-reverse puts HeroUI's first child (icon) on the right. */
+/** Value text: left-aligned, proper foreground color */
 const selectValueClasses = "text-sm text-foreground text-left truncate"
 
 const defaultClassNames = {
@@ -27,10 +29,10 @@ const defaultClassNames = {
   selectorIcon: "shrink-0 text-muted-foreground pointer-events-none",
   listboxWrapper: "p-0",
   listbox: cn(
-    "max-h-[300px] overflow-auto rounded-md border border-border bg-popover p-1 shadow-lg"
+    "max-h-[300px] overflow-auto rounded-lg border border-border bg-popover p-1 shadow-lg"
   ),
   popoverContent: cn(
-    "rounded-md border border-border bg-popover shadow-lg p-0"
+    "rounded-lg border border-border bg-popover shadow-lg p-0"
   ),
 }
 
@@ -41,7 +43,7 @@ const Select = React.forwardRef<React.ElementRef<typeof HeroUISelect>, SelectPro
     {
       classNames,
       variant = "bordered",
-      radius = "md",
+      radius = "lg",
       size = "md",
       ...props
     },
