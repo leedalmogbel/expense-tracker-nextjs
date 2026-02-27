@@ -26,9 +26,9 @@ export function Navbar() {
           <Link href="#how-it-works" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             How it Works
           </Link>
-          <Link href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          {/* <Link href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Pricing
-          </Link>
+          </Link> */}
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -66,13 +66,13 @@ export function Navbar() {
             >
               How it Works
             </Link>
-            <Link
+            {/* <Link
               href="#pricing"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               onClick={() => setMobileOpen(false)}
             >
               Pricing
-            </Link>
+            </Link> */}
             <div className="flex flex-col gap-2 pt-2 border-t border-border">
               <Button variant="ghost" asChild className="justify-start">
                 <Link href="/login">Log in</Link>

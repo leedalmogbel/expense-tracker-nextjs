@@ -6,7 +6,8 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden pt-32 pb-20 md:pt-44 md:pb-32">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[600px] w-[800px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[600px] w-[800px] rounded-full bg-primary/5 blur-3xl dark:bg-primary/10" />
+        <div className="absolute top-40 left-1/3 h-[400px] w-[400px] rounded-full bg-[hsl(var(--chart-5))]/5 blur-3xl dark:bg-[hsl(var(--chart-5))]/8" />
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
@@ -52,7 +53,7 @@ export function Hero() {
         </div>
 
         <div className="relative mx-auto mt-16 max-w-5xl">
-          <div className="rounded-xl border border-border bg-card p-2 shadow-2xl shadow-primary/5">
+          <div className="rounded-xl border border-border bg-card p-2 shadow-2xl shadow-primary/5 dark:border-white/[0.06] dark:shadow-primary/10">
             <div className="rounded-lg bg-muted/50 p-4 md:p-8">
               <DashboardPreview />
             </div>

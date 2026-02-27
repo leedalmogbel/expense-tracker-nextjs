@@ -35,7 +35,7 @@ export function HowItWorks() {
         <div className="mt-16 grid gap-8 md:grid-cols-3">
           {steps.map((step) => (
             <div key={step.step} className="relative text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 <step.icon className="h-7 w-7" />
               </div>
               <span className="mt-4 block text-xs font-bold uppercase tracking-widest text-primary">

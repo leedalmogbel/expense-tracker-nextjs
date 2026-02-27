@@ -69,10 +69,10 @@ export function Pricing() {
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-xl border p-8 transition-all ${
+              className={`relative rounded-xl border p-8 transition-all duration-300 ${
                 plan.highlighted
-                  ? "border-primary bg-background shadow-xl shadow-primary/10 scale-[1.02]"
-                  : "border-border bg-background hover:border-primary/30"
+                  ? "border-primary bg-background shadow-xl shadow-primary/10 scale-[1.02] dark:shadow-primary/20 dark:border-primary/50"
+                  : "border-border bg-background hover:border-primary/30 dark:bg-card/60 dark:backdrop-blur-xl"
               }`}
             >
               {plan.highlighted && (

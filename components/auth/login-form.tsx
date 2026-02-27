@@ -2,29 +2,77 @@
 
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Eye, EyeOff, ArrowRight, Mail, Lock, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/contexts/auth-context"
+
+function GoogleIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="currentColor"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="currentColor"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="currentColor"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="currentColor"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  )
+}
 
 export function LoginForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { user, signInWithGoogle, loading: authLoading, isSupabaseConfigured } = useAuth()
   const [activeTab, setActiveTab] = useState<"login" | "signup">(
     searchParams.get("tab") === "signup" ? "signup" : "login"
   )
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [googleError, setGoogleError] = useState<string | null>(null)
+  const [googleLoading, setGoogleLoading] = useState(false)
+
+  const next = searchParams.get("next") ?? "/dashboard"
+
+  useEffect(() => {
+    if (authLoading) return
+    if (isSupabaseConfigured && user) {
+      router.replace(next.startsWith("/") ? next : "/dashboard")
+    }
+  }, [authLoading, user, isSupabaseConfigured, router, next])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (isSupabaseConfigured) {
+      setGoogleError("Please sign in with Google to access your account.")
+      return
+    }
     setIsLoading(true)
     setTimeout(() => {
       setIsLoading(false)
       router.push("/dashboard")
     }, 800)
+  }
+
+  const handleGoogleSignIn = async () => {
+    setGoogleError(null)
+    setGoogleLoading(true)
+    const { error } = await signInWithGoogle({ redirectTo: "/dashboard" })
+    setGoogleLoading(false)
+    if (error) setGoogleError(error.message)
   }
 
   return (
@@ -87,16 +135,45 @@ export function LoginForm() {
 
           <div>
             <h1 className="font-heading text-2xl font-bold text-foreground">
-              {activeTab === "login" ? "Welcome back" : "Create your account"}
+              {isSupabaseConfigured ? "Sign in to Dosh Mate" : activeTab === "login" ? "Welcome back" : "Create your account"}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              {activeTab === "login"
-                ? "Sign in to continue managing your finances."
-                : "Start your journey to better financial health."}
+              {isSupabaseConfigured
+                ? "Use your Google account to access your private expense data."
+                : activeTab === "login"
+                  ? "Sign in to continue managing your finances."
+                  : "Start your journey to better financial health."}
             </p>
           </div>
 
-          {/* Tab Switcher */}
+          {/* Google sign-in (required when Supabase is configured) */}
+          {isSupabaseConfigured && (
+            <>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Sign in with Google to access your private expense data. No guest access.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2 mt-4"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading || authLoading}
+              >
+                {googleLoading || authLoading ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <GoogleIcon />
+                )}
+                Continue with Google
+              </Button>
+              {googleError && (
+                <p className="mt-2 text-sm text-destructive">{googleError}</p>
+              )}
+                </>
+          )}
+
+          {!isSupabaseConfigured && (
+          <>
           <div className="mt-6 flex rounded-lg bg-muted p-1">
             <button
               className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
@@ -196,9 +273,13 @@ export function LoginForm() {
               )}
             </Button>
           </form>
+          </>
+          )}
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            {activeTab === "login" ? (
+            {isSupabaseConfigured ? (
+              "Your data is private and only accessible after signing in with Google."
+            ) : activeTab === "login" ? (
               <>
                 {"Don't have an account? "}
                 <button
