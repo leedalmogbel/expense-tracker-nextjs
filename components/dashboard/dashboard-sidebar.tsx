@@ -14,11 +14,13 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
+  Users,
   ChevronUp,
   Wallet,
   BanknoteArrowUp,
   ShoppingBasket,
   EllipsisVertical,
+  Activity,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useRef, useEffect, useCallback } from "react"
@@ -43,6 +45,8 @@ const navItems = [
   { href: "/dashboard/income", icon: BanknoteArrowUp, label: "Income" },
   { href: "/dashboard/cards", icon: CreditCard, label: "Cards" },
   { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips" },
+  { href: "/dashboard/members", icon: Users, label: "Members" },
+  { href: "/dashboard/activity", icon: Activity, label: "Activity" },
 ]
 
 // Mobile: 4 primary tabs + "More" popover for the rest
