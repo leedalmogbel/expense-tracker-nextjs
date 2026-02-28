@@ -82,7 +82,7 @@ export function LoginForm() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_70%)]" />
         <div className="relative">
           <Link href="/" className="flex items-center gap-2">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-foreground/20 backdrop-blur-sm">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-foreground/20">
               <Image src="/assets/doshmate-logo.png" alt="Dosh Mate" width={40} height={40} className="object-contain" />
             </div>
             <span className="text-xl font-bold font-heading text-primary-foreground">Dosh Mate</span>

@@ -6,6 +6,21 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import { ensureProfile } from "@/lib/supabase-api"
 import { clearAllData } from "@/lib/storage"
 
+const DEV_BYPASS_AUTH =
+  process.env.NODE_ENV === "development" &&
+  process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === "true"
+
+const MOCK_USER = DEV_BYPASS_AUTH
+  ? ({
+      id: "dev-local-user",
+      email: "dev@localhost",
+      user_metadata: { full_name: "Dev User" },
+      app_metadata: {},
+      aud: "authenticated",
+      created_at: new Date().toISOString(),
+    } as unknown as User)
+  : null
+
 type AuthContextValue = {
   user: User | null
   session: Session | null
@@ -18,11 +33,12 @@ type AuthContextValue = {
 const AuthContext = React.createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null)
+  const [user, setUser] = React.useState<User | null>(MOCK_USER)
   const [session, setSession] = React.useState<Session | null>(null)
-  const [loading, setLoading] = React.useState(true)
+  const [loading, setLoading] = React.useState(!DEV_BYPASS_AUTH)
 
   React.useEffect(() => {
+    if (DEV_BYPASS_AUTH) return
     if (!supabase) {
       setLoading(false)
       return

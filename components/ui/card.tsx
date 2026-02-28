@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <HeroUICard ref={ref} shadow="sm" radius="lg" className={cn("border border-border bg-card/90 text-card-foreground backdrop-blur-2xl shadow-sm shadow-black/[0.03] dark:bg-card/70 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/30 transition-shadow duration-300", className)} {...props} />
+  <HeroUICard ref={ref} shadow="sm" radius="lg" className={cn("border border-border bg-card text-card-foreground shadow-sm shadow-black/[0.03] dark:shadow-lg dark:shadow-black/20 transition-shadow duration-300", className)} {...props} />
 ))
 Card.displayName = "Card"
 
