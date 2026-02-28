@@ -50,9 +50,9 @@ export default function DashboardPage() {
         <motion.div variants={fadeUpItem} className="hidden sm:grid gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-2">
           <Link
             href="/dashboard/transactions"
-            className="flex items-center gap-3 rounded-xl border border-border bg-card/80 backdrop-blur-xl p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group dark:bg-card/60 dark:border-white/[0.06]"
+            className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110">
               <Receipt className="h-5 w-5" />
             </div>
             <div>
@@ -62,9 +62,9 @@ export default function DashboardPage() {
           </Link>
           <Link
             href="/dashboard/analytics"
-            className="flex items-center gap-3 rounded-xl border border-border bg-card/80 backdrop-blur-xl p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group dark:bg-card/60 dark:border-white/[0.06]"
+            className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-chart-2/10 text-[hsl(var(--chart-2))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-2))] group-hover:text-white group-hover:scale-110">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-chart-2/10 text-[hsl(var(--chart-2))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-2))] group-hover:text-white group-hover:scale-110">
               <PieChart className="h-5 w-5" />
             </div>
             <div>
@@ -74,9 +74,9 @@ export default function DashboardPage() {
           </Link>
           <Link
             href="/dashboard/budgets"
-            className="flex items-center gap-3 rounded-xl border border-border bg-card/80 backdrop-blur-xl p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group dark:bg-card/60 dark:border-white/[0.06]"
+            className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-chart-3/10 text-[hsl(var(--chart-3))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-3))] group-hover:text-white group-hover:scale-110">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-chart-3/10 text-[hsl(var(--chart-3))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-3))] group-hover:text-white group-hover:scale-110">
               <Target className="h-5 w-5" />
             </div>
             <div>
@@ -86,9 +86,9 @@ export default function DashboardPage() {
           </Link>
           <Link
             href="/dashboard/income"
-            className="flex items-center gap-3 rounded-xl border border-border bg-card/80 backdrop-blur-xl p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group dark:bg-card/60 dark:border-white/[0.06]"
+            className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-chart-4/10 text-[hsl(var(--chart-4))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-4))] group-hover:text-white group-hover:scale-110">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-chart-4/10 text-[hsl(var(--chart-4))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-4))] group-hover:text-white group-hover:scale-110">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
@@ -98,9 +98,9 @@ export default function DashboardPage() {
           </Link>
           <Link
             href="/dashboard/shopping-trips"
-            className="flex items-center gap-3 rounded-xl border border-border bg-card/80 backdrop-blur-xl p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group dark:bg-card/60 dark:border-white/[0.06]"
+            className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-chart-5/10 text-[hsl(var(--chart-5))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-5))] group-hover:text-white group-hover:scale-110">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-chart-5/10 text-[hsl(var(--chart-5))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-5))] group-hover:text-white group-hover:scale-110">
               <ShoppingBasket className="h-5 w-5" />
             </div>
             <div>
