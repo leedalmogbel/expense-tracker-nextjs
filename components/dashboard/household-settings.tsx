@@ -76,7 +76,8 @@ export function HouseholdSettings() {
   const handleInvite = async () => {
     if (!householdId || !inviteEmail.trim()) return
     setInviting(true)
-    const { inviteId, error } = await inviteToHousehold(householdId, inviteEmail, inviteRole)
+    const actorName = user?.user_metadata?.full_name ?? user?.email ?? undefined
+    const { inviteId, error } = await inviteToHousehold(householdId, inviteEmail, inviteRole, actorName)
     setInviting(false)
     if (error || !inviteId) {
       toast.error("Invite failed", { description: error ?? "Something went wrong" })

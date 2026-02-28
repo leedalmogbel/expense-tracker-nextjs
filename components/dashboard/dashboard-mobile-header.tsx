@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Bell, Moon, Sun, Settings, User, LogOut } from "lucide-react"
+import { Moon, Sun, Settings, User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
@@ -13,6 +13,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/react"
+import { NotificationPopover } from "./notification-popover"
 
 function getUserDisplayName(email: string | undefined, metadata?: { full_name?: string; name?: string } | null): string {
   if (metadata?.full_name?.trim()) return metadata.full_name.trim()
@@ -29,17 +30,10 @@ function getInitials(displayName: string, email: string | undefined): string {
   return "?"
 }
 
-interface DashboardMobileHeaderProps {
-  /** Unread notification count; 0 = no badge */
-  notificationCount?: number
-}
-
-export function DashboardMobileHeader({ notificationCount = 3 }: DashboardMobileHeaderProps) {
+export function DashboardMobileHeader() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { user, signOut } = useAuth()
-  const hasNotifications = notificationCount > 0
-  const badgeLabel = notificationCount >= 10 ? "9+" : String(notificationCount)
 
   const displayName = getUserDisplayName(user?.email, user?.user_metadata)
   const initials = getInitials(displayName, user?.email)
@@ -65,24 +59,7 @@ export function DashboardMobileHeader({ notificationCount = 3 }: DashboardMobile
           <Sun className="h-6 w-6 rotate-0 scale-100 dark:scale-0" />
           <Moon className="absolute h-6 w-6 rotate-90 scale-0 dark:rotate-0 dark:scale-100" />
         </Button>
-        <span className="relative inline-flex shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-13 w-13 min-h-11 min-w-11 rounded-lg touch-manipulation active:scale-95"
-            aria-label={hasNotifications ? `${notificationCount} unread notifications` : "Notifications"}
-          >
-            <Bell className="h-6 w-6 px-0" />
-          </Button>
-          {hasNotifications && (
-            <span
-              className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-destructive px-1 text-[10px] font-semibold tabular-nums leading-none text-white sm:h-5 sm:min-w-5"
-              aria-hidden
-            >
-              {badgeLabel}
-            </span>
-          )}
-        </span>
+        <NotificationPopover />
 
         {/* User avatar dropdown */}
         <Dropdown placement="bottom-end">

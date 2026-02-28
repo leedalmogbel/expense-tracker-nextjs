@@ -16,8 +16,6 @@ interface DashboardHeaderProps {
   onAddExpense: () => void
   onAddBudget: () => void
   onAddIncome: () => void
-  /** Number of unread notifications; 0 = show dot only, >0 = show count (9+ for 10+) */
-  notificationCount?: number
 }
 
 export function DashboardHeader({

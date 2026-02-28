@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Bell, Search, Plus, Settings, Moon, Sun, ChevronDown, Receipt, Target, ArrowUpCircle } from "lucide-react"
+import { Search, Plus, Settings, Moon, Sun, ChevronDown, Receipt, Target, ArrowUpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,19 +15,13 @@ import { useDashboardActions } from "@/contexts/dashboard-actions-context"
 import { useExpense } from "@/contexts/expense-context"
 import { useTheme } from "next-themes"
 import { useRef, useEffect } from "react"
+import { NotificationPopover } from "./notification-popover"
 
-interface DashboardTopbarProps {
-  /** Unread notification count */
-  notificationCount?: number
-}
-
-export function DashboardTopbar({ notificationCount = 3 }: DashboardTopbarProps) {
+export function DashboardTopbar() {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
   const { searchQuery, setSearchQuery } = useExpense()
   const { theme, setTheme } = useTheme()
   const searchRef = useRef<HTMLInputElement>(null)
-  const hasNotifications = notificationCount > 0
-  const badgeLabel = notificationCount >= 10 ? "9+" : String(notificationCount)
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -47,7 +41,7 @@ export function DashboardTopbar({ notificationCount = 3 }: DashboardTopbarProps)
   }
 
   return (
-    <header className="z-30 hidden h-16 w-full shrink-0 items-center justify-between gap-4 border-b border-border bg-background/80 backdrop-blur-xl px-6 shadow-sm lg:flex dark:bg-background/60 dark:border-white/[0.06]">
+    <header className="z-30 hidden h-16 w-full shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-6 shadow-sm lg:flex">
       <div className="relative w-full max-w-sm shrink-0">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none lg:h-5 lg:w-5" />
         <Input
@@ -72,24 +66,7 @@ export function DashboardTopbar({ notificationCount = 3 }: DashboardTopbarProps)
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 xl:h-6 xl:w-6" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 xl:h-6 xl:w-6" />
         </Button>
-        <span className="relative inline-flex shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-xl xl:h-12 xl:w-12"
-            aria-label={hasNotifications ? `${notificationCount} unread notifications` : "Notifications"}
-          >
-            <Bell className="h-5 w-5 px-0 xl:h-6 xl:w-6" />
-          </Button>
-          {hasNotifications && (
-            <span
-              className="absolute right-0 top-0 flex min-h-[1.375rem] min-w-[1.375rem] items-center justify-center rounded-full border-2 border-background bg-destructive px-1 text-[11px] font-semibold tabular-nums leading-none text-white"
-              aria-hidden
-            >
-              {badgeLabel}
-            </span>
-          )}
-        </span>
+        <NotificationPopover />
         {/* <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl" asChild>
           <Link href="/dashboard/settings" aria-label="Settings">
             <Settings className="h-6 w-6" />

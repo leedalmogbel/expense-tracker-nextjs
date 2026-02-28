@@ -21,6 +21,7 @@ import {
   ShoppingBasket,
   EllipsisVertical,
   Activity,
+  Grid3X3,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useRef, useEffect, useCallback } from "react"
@@ -42,6 +43,7 @@ const navItems = [
   { href: "/dashboard/transactions", icon: Receipt, label: "Transactions" },
   { href: "/dashboard/analytics", icon: PieChart, label: "Analytics" },
   { href: "/dashboard/budgets", icon: Target, label: "Budgets" },
+  { href: "/dashboard/categories", icon: Grid3X3, label: "Categories" },
   { href: "/dashboard/income", icon: BanknoteArrowUp, label: "Income" },
   { href: "/dashboard/cards", icon: CreditCard, label: "Cards" },
   { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips" },
@@ -133,7 +135,7 @@ function MobileTabBar({ pathname }: { pathname: string }) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-[50] border-t border-border/80 bg-card/95 backdrop-blur-2xl shadow-[0_-1px_3px_0_rgb(0,0,0,0.03)] dark:bg-card/80 dark:border-white/[0.08] dark:shadow-[0_-2px_8px_0_rgb(0,0,0,0.3)] lg:hidden pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-[50] border-t border-border bg-card shadow-[0_-1px_3px_0_rgb(0,0,0,0.03)] dark:shadow-[0_-2px_8px_0_rgb(0,0,0,0.2)] lg:hidden pb-[env(safe-area-inset-bottom)]"
       role="tablist"
     >
       <div className="flex items-end justify-around">
@@ -175,7 +177,7 @@ function MobileTabBar({ pathname }: { pathname: string }) {
 
           {/* Popover */}
           {moreOpen && (
-            <div className="absolute bottom-full mb-2 right-0 min-w-[160px] rounded-xl border border-border/80 bg-card/95 backdrop-blur-2xl shadow-lg shadow-black/[0.06] dark:bg-card/90 dark:border-white/[0.1] dark:shadow-xl dark:shadow-black/40 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
+            <div className="absolute bottom-full mb-2 right-0 min-w-[160px] rounded-xl border border-border bg-card shadow-lg shadow-black/[0.06] dark:shadow-xl dark:shadow-black/30 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
               {mobileMoreItems.map((item) => {
                 const isActive = pathname === item.href
                 return (
@@ -212,9 +214,9 @@ export function DashboardSidebar() {
   const userEmail = user?.email ?? null
 
   const linkBase =
-    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all min-h-[44px] rounded-l-none border-l-2 border-l-transparent active:scale-[0.97]"
-  const linkActive = "bg-accent text-accent-foreground border-l-primary"
-  const linkInactive = "text-muted-foreground hover:bg-muted hover:text-foreground"
+    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 min-h-[44px] rounded-l-none border-l-2 border-l-transparent active:scale-[0.97]"
+  const linkActive = "bg-accent text-accent-foreground border-l-primary font-semibold"
+  const linkInactive = "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
   const linkCollapsed = "justify-center px-0 w-full min-w-[44px] rounded-l-lg border-l-0"
 
   const renderNavLink = (
@@ -385,7 +387,7 @@ export function DashboardSidebar() {
       {/* ── Desktop sidebar ────────────────────────────────── */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-[50] hidden lg:flex h-screen flex-col border-r border-border/80 bg-card/95 backdrop-blur-2xl shadow-sm shadow-black/[0.02] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] dark:bg-card/80 dark:border-white/[0.08] dark:shadow-xl dark:shadow-black/25",
+          "fixed left-0 top-0 z-[50] hidden lg:flex h-screen flex-col border-r border-border bg-card shadow-sm shadow-black/[0.02] transition-[width] duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] dark:shadow-lg dark:shadow-black/15",
           "w-64",
           collapsed && "lg:w-[72px]"
         )}

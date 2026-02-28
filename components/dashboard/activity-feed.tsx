@@ -129,13 +129,13 @@ export const ActivityFeed = memo(function ActivityFeed() {
                 >
                   <div
                     className={cn(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                       isIncome
                         ? "bg-primary/10 text-primary"
                         : "bg-muted/80 dark:bg-muted/40 text-muted-foreground"
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-4.5 w-4.5" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground leading-tight">
