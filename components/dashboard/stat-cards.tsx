@@ -79,20 +79,20 @@ export const StatCards = memo(function StatCards() {
         <Card
           key={stat.label}
           className={cn(
-            "border-border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98]",
-            i === 0 && "relative overflow-hidden bg-gradient-to-br from-primary/10 via-card to-card dark:from-primary/15 dark:via-card/60 dark:to-card/60"
+            "border-border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] overflow-hidden",
+            i === 0 && "relative bg-gradient-to-br from-primary/15 via-primary/5 to-card dark:from-primary/20 dark:via-primary/8 dark:to-card/60"
           )}
         >
           {i === 0 && (
-            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/8 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-28 h-28 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           )}
           <CardContent className="relative p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground truncate">
                 {stat.label}
               </p>
-              <div className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg ${stat.iconBg}`}>
-                <stat.icon className="h-4 w-4" />
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${stat.iconBg}`}>
+                <stat.icon className="h-4.5 w-4.5" />
               </div>
             </div>
             <p className="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold font-heading text-foreground break-all tracking-tight">

@@ -27,7 +27,7 @@ export function ShoppingTripsList({ trips, onStartTrip, onViewTrip }: ShoppingTr
         <button
           type="button"
           onClick={() => onStartTrip("grocery")}
-          className="flex items-center gap-4 rounded-xl border border-border bg-card/80 backdrop-blur-xl p-5 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group text-left"
+          className="flex items-center gap-4 rounded-xl border border-border bg-card p-5 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group text-left"
         >
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110">
             <ShoppingCart className="h-6 w-6" />
@@ -40,7 +40,7 @@ export function ShoppingTripsList({ trips, onStartTrip, onViewTrip }: ShoppingTr
         <button
           type="button"
           onClick={() => onStartTrip("shopping")}
-          className="flex items-center gap-4 rounded-xl border border-border bg-card/80 backdrop-blur-xl p-5 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group text-left"
+          className="flex items-center gap-4 rounded-xl border border-border bg-card p-5 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] group text-left"
         >
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))] transition-all duration-300 group-hover:bg-[hsl(var(--chart-2))] group-hover:text-white group-hover:scale-110">
             <ShoppingBag className="h-6 w-6" />

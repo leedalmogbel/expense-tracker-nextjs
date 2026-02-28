@@ -141,7 +141,7 @@ export function RecentTransactions() {
       <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
         <div className="flex items-start justify-between gap-4 w-full">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Receipt className="h-5 w-5" />
             </div>
             <div className="min-w-0">
@@ -271,7 +271,7 @@ export function RecentTransactions() {
                     >
                       <div
                         className={cn(
-                          "flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg",
+                          "flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full",
                           iconBg
                         )}
                       >

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectItem } from "@/components/ui/select"
 import { inviteToHousehold } from "@/lib/supabase-api"
+import { useAuth } from "@/contexts/auth-context"
 import { toast } from "sonner"
 import { Mail, Loader2, Check, UserPlus } from "lucide-react"
 
@@ -15,6 +16,7 @@ export function InviteMemberCard({
   householdId: string
   onInviteCreated: () => void
 }) {
+  const { user } = useAuth()
   const [email, setEmail] = useState("")
   const [role, setRole] = useState<"member" | "admin">("member")
   const [inviting, setInviting] = useState(false)
@@ -23,7 +25,8 @@ export function InviteMemberCard({
   const handleInvite = async () => {
     if (!email.trim()) return
     setInviting(true)
-    const { inviteId, error } = await inviteToHousehold(householdId, email, role)
+    const actorName = user?.user_metadata?.full_name ?? user?.email ?? undefined
+    const { inviteId, error } = await inviteToHousehold(householdId, email, role, actorName)
     setInviting(false)
     if (error || !inviteId) {
       toast.error("Invite failed", { description: error ?? "Something went wrong" })

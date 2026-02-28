@@ -2,28 +2,39 @@
 
 import { memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
 import { useExpense } from "@/contexts/expense-context"
 import { BarChart3 } from "lucide-react"
 
 export const AnalyticsBarChart = memo(function AnalyticsBarChart() {
-  const { chartData7Months, currency, selectedMonthFilter, setSelectedMonthFilter, setSelectedDate, setDateRangeFilter, year, month } = useExpense()
-  const currentMonthKey = `${year}-${month}`
+  const { chartData7Months, currency, selectedMonthFilter, setSelectedMonthFilter, setSelectedDate, setDateRangeFilter } = useExpense()
 
   return (
     <Card className="w-full border-border">
       <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-4))]/10 text-[hsl(var(--chart-4))]">
-            <BarChart3 className="h-5 w-5" />
+        <div className="flex flex-wrap items-start justify-between gap-3 w-full">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-4))]/10 text-[hsl(var(--chart-4))]">
+              <BarChart3 className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                Monthly Comparison
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Last 7 months &middot; Click a bar to filter
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
-              Analytics
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Last 7 months &middot; Click a bar to filter
-            </p>
+          <div className="flex gap-3 sm:gap-4 text-xs shrink-0 pt-1">
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+              <span className="text-muted-foreground">Income</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--chart-4))]" />
+              <span className="text-muted-foreground">Expenses</span>
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -33,6 +44,8 @@ export const AnalyticsBarChart = memo(function AnalyticsBarChart() {
             <BarChart
               data={chartData7Months}
               margin={{ top: 5, right: 5, left: -10, bottom: 0 }}
+              barCategoryGap="20%"
+              barGap={2}
               onClick={(state) => {
                 if (state?.activePayload?.[0]?.payload) {
                   const { year: y, monthNum: m } = state.activePayload[0].payload
@@ -63,32 +76,32 @@ export const AnalyticsBarChart = memo(function AnalyticsBarChart() {
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "8px",
                   fontSize: "13px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 }}
-                formatter={(value: number) => [`${currency.symbol}${Number(value).toLocaleString()}`, "Expenses"]}
-                labelFormatter={(label, payload) => payload?.[0]?.payload ? `${payload[0].payload.month} ${payload[0].payload.year}` : label}
+                formatter={(value: number, name: string) => [
+                  `${currency.symbol}${Number(value).toLocaleString()}`,
+                  name === "income" ? "Income" : "Expenses",
+                ]}
+                labelFormatter={(label, payload) =>
+                  payload?.[0]?.payload ? `${payload[0].payload.month} ${payload[0].payload.year}` : label
+                }
               />
-              <Bar dataKey="total" radius={[4, 4, 0, 0]} name="Expenses">
-                {chartData7Months.map((entry, index) => (
-                  <Cell
-                    key={entry.monthKey}
-                    fill={
-                      selectedMonthFilter?.year === entry.year && selectedMonthFilter?.month === entry.monthNum
-                        ? "hsl(var(--primary))"
-                        : entry.monthKey === currentMonthKey
-                          ? "hsl(var(--primary))"
-                          : "hsl(var(--chart-4))"
-                    }
-                    opacity={
-                      selectedMonthFilter?.year === entry.year && selectedMonthFilter?.month === entry.monthNum
-                        ? 1
-                        : entry.monthKey === currentMonthKey
-                          ? 0.9
-                          : 0.6
-                    }
-                    className="cursor-pointer"
-                  />
-                ))}
-              </Bar>
+              <Bar
+                dataKey="income"
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                name="income"
+                className="cursor-pointer"
+                opacity={0.85}
+              />
+              <Bar
+                dataKey="expenses"
+                fill="hsl(var(--chart-4))"
+                radius={[4, 4, 0, 0]}
+                name="expenses"
+                className="cursor-pointer"
+                opacity={0.85}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

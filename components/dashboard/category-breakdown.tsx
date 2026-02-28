@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChart as PieChartIcon } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { useExpense } from "@/contexts/expense-context"
+import { cn } from "@/lib/utils"
 
 export const CategoryBreakdown = memo(function CategoryBreakdown() {
   const { categoryBreakdown, currency } = useExpense()
@@ -15,7 +16,7 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
       <Card className="w-full border-border text-card-foreground">
         <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
           <div className="flex items-center gap-3 w-full">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
               <PieChartIcon className="h-5 w-5" />
             </div>
             <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
@@ -40,16 +41,21 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
     <Card className="w-full border-border">
       <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
         <div className="flex items-center gap-3 w-full">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
             <PieChartIcon className="h-5 w-5" />
           </div>
-          <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
-            Spending by Category
-          </CardTitle>
+          <div className="min-w-0">
+            <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+              Spending by Category
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {categoryBreakdown.length} categor{categoryBreakdown.length === 1 ? "y" : "ies"}
+            </p>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 pt-0">
-        <div className="flex flex-col items-center gap-4 sm:gap-6 lg:flex-row">
+        <div className="flex flex-col items-center gap-4 sm:gap-6 lg:flex-col">
           <div className="relative h-[180px] w-[180px] sm:h-[200px] sm:w-[200px] shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -57,8 +63,8 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
                   data={categoryBreakdown}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
+                  innerRadius={55}
+                  outerRadius={85}
                   paddingAngle={3}
                   dataKey="value"
                   strokeWidth={0}
@@ -91,27 +97,38 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
             </div>
           </div>
 
-          <div className="w-full flex-1 space-y-3">
-            {categoryBreakdown.map((item) => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 shrink-0 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm text-foreground">{item.name}</span>
+          <div className="w-full flex-1 space-y-2">
+            {categoryBreakdown.map((item) => {
+              const pct = total > 0 ? (item.value / total) * 100 : 0
+              return (
+                <div key={item.name} className="group">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm text-foreground truncate">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm font-medium text-foreground tabular-nums">
+                        {currency.symbol}
+                        {item.value.toLocaleString()}
+                      </span>
+                      <span className="w-10 text-right text-xs font-medium text-muted-foreground tabular-nums">
+                        {pct.toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-muted/50 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, backgroundColor: item.color }}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-foreground">
-                    {currency.symbol}
-                    {item.value.toLocaleString()}
-                  </span>
-                  <span className="w-10 text-right text-xs text-muted-foreground">
-                    {total > 0 ? ((item.value / total) * 100).toFixed(0) : 0}%
-                  </span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </CardContent>
