@@ -436,6 +436,23 @@ export async function syncSingleTransaction(
       app_id: transaction.id,
     })
     if (error) return { success: false, error: error.message }
+
+    // Notify other household members about the new transaction
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", userId)
+      .single()
+    const actorName = profile?.full_name ?? "Someone"
+    const amount = Math.abs(transaction.amount)
+    createNotificationForHousehold(
+      householdId,
+      "transaction_added",
+      type === "income" ? "Income Added" : "Expense Added",
+      `${actorName} added ${type === "income" ? "income" : "an expense"}: ${categoryName} — ${amount.toFixed(2)}`,
+      userId,
+      actorName
+    ).catch(() => {}) // fire-and-forget
   }
 
   return { success: true }
@@ -523,7 +540,8 @@ export async function getUserMemberHouseholdId(
 export async function inviteToHousehold(
   householdId: string,
   email: string,
-  role: "admin" | "member" = "member"
+  role: "admin" | "member" = "member",
+  actorName?: string
 ): Promise<{ inviteId: string | null; error: string | null }> {
   if (!supabase) return { inviteId: null, error: "Supabase is not configured." }
   const { data, error } = await supabase
@@ -532,6 +550,17 @@ export async function inviteToHousehold(
     .select("id")
     .single()
   if (error) return { inviteId: null, error: error.message }
+
+  // Notify household members
+  createNotificationForHousehold(
+    householdId,
+    "invite_sent",
+    "New Invitation",
+    `${actorName ?? "Someone"} invited ${email} to the household`,
+    "", // no user to exclude — all members should see it
+    actorName
+  ).catch(() => {}) // fire-and-forget
+
   return { inviteId: data?.id ?? null, error: null }
 }
 
@@ -608,6 +637,24 @@ export async function acceptInvite(
     .update({ status: "accepted" })
     .eq("id", inviteId)
   if (updateError) return { error: updateError.message }
+
+  // Fetch the new member's name for the notification
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", userId)
+    .single()
+  const memberName = profile?.full_name ?? invite.email
+
+  // Notify household members
+  createNotificationForHousehold(
+    invite.household_id,
+    "member_joined",
+    "New Member",
+    `${memberName} joined the household`,
+    userId,
+    memberName
+  ).catch(() => {}) // fire-and-forget
 
   return { error: null }
 }
@@ -739,4 +786,92 @@ export async function fetchHouseholdActivityLog(
   })
 
   return { entries, error: null }
+}
+
+// ─── Notifications ───────────────────────────────────────────────────────
+
+export type AppNotification = {
+  id: string
+  user_id: string
+  household_id: string
+  type: "invite_sent" | "member_joined" | "transaction_added"
+  title: string
+  message: string
+  actor_name: string | null
+  read: boolean
+  created_at: string
+}
+
+/**
+ * Fetch notifications for a user.
+ */
+export async function fetchNotifications(
+  userId: string
+): Promise<{ notifications: AppNotification[]; error: string | null }> {
+  if (!supabase) return { notifications: [], error: "Supabase is not configured." }
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50)
+  if (error) return { notifications: [], error: error.message }
+  return { notifications: (data ?? []) as AppNotification[], error: null }
+}
+
+/**
+ * Mark a single notification as read.
+ */
+export async function markNotificationRead(
+  notificationId: string
+): Promise<{ error: string | null }> {
+  if (!supabase) return { error: "Supabase is not configured." }
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true })
+    .eq("id", notificationId)
+  return { error: error?.message ?? null }
+}
+
+/**
+ * Mark all notifications as read for a user.
+ */
+export async function markAllNotificationsRead(
+  userId: string
+): Promise<{ error: string | null }> {
+  if (!supabase) return { error: "Supabase is not configured." }
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true })
+    .eq("user_id", userId)
+    .eq("read", false)
+  return { error: error?.message ?? null }
+}
+
+/**
+ * Create a notification for all household members except the actor.
+ */
+export async function createNotificationForHousehold(
+  householdId: string,
+  type: AppNotification["type"],
+  title: string,
+  message: string,
+  excludeUserId: string,
+  actorName?: string | null
+): Promise<void> {
+  if (!supabase) return
+  const { members } = await getHouseholdMembers(householdId)
+  const targets = members.filter((m) => m.user_id !== excludeUserId)
+  await Promise.all(
+    targets.map((m) =>
+      supabase!.rpc("create_notification", {
+        p_user_id: m.user_id,
+        p_household_id: householdId,
+        p_type: type,
+        p_title: title,
+        p_message: message,
+        p_actor_name: actorName ?? null,
+      })
+    )
+  )
 }
