@@ -8,6 +8,7 @@ import { DashboardMobileHeader } from "@/components/dashboard/dashboard-mobile-h
 import { AddExpenseModal } from "@/components/dashboard/add-expense-modal"
 import { AddBudgetModal } from "@/components/dashboard/add-budget-modal"
 import { AddIncomeModal } from "@/components/dashboard/add-income-modal"
+import { PendingInviteBanner } from "@/components/dashboard/pending-invite-banner"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { getCreditCardReminders } from "@/lib/storage"
@@ -68,6 +69,9 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
         <DashboardTopbar />
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-20 lg:pb-8 lg:px-6">
           <DashboardMobileHeader />
+          <div className="px-4 pt-4 sm:px-6 lg:px-8">
+            <PendingInviteBanner />
+          </div>
           {children}
         </main>
       </div>

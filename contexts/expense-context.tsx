@@ -77,6 +77,8 @@ type ExpenseContextValue = {
   prevMonthExpenses: number
   searchQuery: string
   setSearchQuery: (q: string) => void
+  scopeFilter: "all" | "personal" | "household"
+  setScopeFilter: (v: "all" | "personal" | "household") => void
   paymentMethods: string[]
   addPaymentMethod: (name: string) => void
   removePaymentMethod: (name: string) => void
@@ -147,6 +149,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   const [selectedCategoryFilter, setSelectedCategoryFilter] = React.useState<string | null>(null)
   const [dateRangeFilter, setDateRangeFilter] = React.useState<{ start: string; end: string } | null>(null)
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [scopeFilter, setScopeFilter] = React.useState<"all" | "personal" | "household">("all")
 
   const refresh = React.useCallback(() => {
     setTransactions(getTransactions())
@@ -222,6 +225,9 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     } else {
       list = filterTransactionsByMonth(transactions, filterYear, filterMonth)
     }
+    if (scopeFilter !== "all") {
+      list = list.filter((t) => (t.scope ?? "personal") === scopeFilter)
+    }
     if (selectedCategoryFilter != null && selectedCategoryFilter !== "all") {
       const norm = selectedCategoryFilter.toLowerCase()
       list = list.filter((t) => normalizeCategory(t.category) === norm)
@@ -236,7 +242,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
       )
     }
     return list.sort((a, b) => (b.date === a.date ? (b.updatedAt?.localeCompare(a.updatedAt) ?? 0) : b.date.localeCompare(a.date)))
-  }, [transactions, filterYear, filterMonth, selectedDate, selectedCategoryFilter, searchQuery, dateRangeFilter])
+  }, [transactions, filterYear, filterMonth, selectedDate, selectedCategoryFilter, searchQuery, dateRangeFilter, scopeFilter])
   const groupedTransactions = React.useMemo(
     () => groupTransactionsByDate(filteredTransactions, (dateStr) => formatRelativeDate(dateStr)),
     [filteredTransactions]
@@ -317,6 +323,8 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     prevMonthExpenses,
     searchQuery,
     setSearchQuery,
+    scopeFilter,
+    setScopeFilter,
     paymentMethods,
     addPaymentMethod,
     removePaymentMethod,
@@ -332,7 +340,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     filteredTransactions, groupedTransactions,
     addTransaction, updateTransactionById, deleteTransactionById, setCurrentBudget,
     refresh, formatCurrency, setCurrency,
-    prevMonthIncome, prevMonthExpenses, searchQuery, paymentMethods,
+    prevMonthIncome, prevMonthExpenses, searchQuery, scopeFilter, paymentMethods,
     addPaymentMethod, removePaymentMethod,
     incomeTransactions, incomeChartData, averageMonthlyIncome, incomeByCategoryData,
   ])

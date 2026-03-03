@@ -151,6 +151,17 @@ export const ActivityFeed = memo(function ActivityFeed() {
                           </span>
                         </>
                       )}
+                      <span className="text-[10px] text-muted-foreground/40">&bull;</span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded px-1 py-0.5 text-[10px] font-medium leading-none",
+                          (tx.scope ?? "personal") === "household"
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {(tx.scope ?? "personal") === "household" ? "Household" : "Personal"}
+                      </span>
                     </div>
                   </div>
                   <span

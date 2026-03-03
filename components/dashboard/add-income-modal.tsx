@@ -19,6 +19,8 @@ import { syncSingleTransaction } from "@/lib/supabase-api"
 import { getMonthName } from "@/lib/expense-utils"
 import { INCOME_CATEGORIES, INCOME_CATEGORY_ICONS } from "@/lib/constants"
 import { toast } from "sonner"
+import { User, Users } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const inputClass = "h-11 rounded-lg border border-input bg-background text-sm"
 
@@ -45,6 +47,7 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
   const [amount, setAmount] = useState("")
   const [category, setCategory] = useState("Salary")
   const [paymentMethod, setPaymentMethod] = useState("Bank Transfer")
+  const [scope, setScope] = useState<"personal" | "household">("personal")
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -66,6 +69,7 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
       date,
       isPositive: true,
       paymentMethod,
+      scope,
     })
     toast.success("Income added", { description: `${currency.symbol}${amountNum.toFixed(2)} for ${getMonthName(month)} ${year}` })
     if (user && isSupabaseConfigured) {
@@ -77,6 +81,7 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
     setAmount("")
     setCategory("Salary")
     setPaymentMethod("Bank Transfer")
+    setScope("personal")
   }
 
   return (
@@ -93,6 +98,42 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
 
         <form onSubmit={handleSubmit} id="add-income-form" className="px-6 pb-6">
           <div className="space-y-5 pt-2">
+            {/* Scope toggle */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Visibility</Label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setScope("personal")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    scope === "personal"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  <User className="h-3.5 w-3.5" />
+                  Personal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScope("household")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    scope === "household"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Household
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {scope === "personal" ? "Only you can see this income." : "Visible to all household members."}
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="income-description" className="text-sm font-medium text-foreground">
                 Source / description

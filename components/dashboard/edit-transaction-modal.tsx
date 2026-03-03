@@ -21,6 +21,8 @@ import { CATEGORIES, CATEGORY_ICONS, getCategoryLabel, INCOME_CATEGORIES, INCOME
 import { toast } from "sonner"
 import { getMonthName } from "@/lib/expense-utils"
 import type { Transaction } from "@/lib/types"
+import { User, Users } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 function normalizePaymentKey(m: string) {
   return m.toLowerCase().replace(/\s+/g, "-")
@@ -51,6 +53,8 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
   const [category, setCategory] = useState<string>("")
   const [paymentMethod, setPaymentMethod] = useState<string>("Other")
 
+  const [scope, setScope] = useState<"personal" | "household">("personal")
+
   // Income form state
   const [incomeAmount, setIncomeAmount] = useState("")
   const [incomeDescription, setIncomeDescription] = useState("")
@@ -63,6 +67,7 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
 
   useEffect(() => {
     if (transaction) {
+      setScope(transaction.scope ?? "personal")
       if (transaction.amount < 0) {
         const fullDesc = transaction.description
         const match = fullDesc.match(/^(.+?)\s*\(([^)]+)\)\s*$/)
@@ -110,6 +115,7 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
       icon,
       date: dateValue,
       paymentMethod: paymentMethod || "Other",
+      scope,
     }
     updateTransactionById(transaction.id, expenseUpdates)
     toast.success("Expense updated")
@@ -139,6 +145,7 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
       icon: INCOME_CATEGORY_ICONS[incomeCategory] ?? "circle-dot",
       date,
       paymentMethod: incomePaymentMethod,
+      scope,
     }
     updateTransactionById(transaction.id, incomeUpdates)
     toast.success("Income updated")
@@ -167,6 +174,42 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
 
             <form onSubmit={handleExpenseSubmit} id="edit-expense-form" className="px-6 pb-6">
               <div className="space-y-5 pt-2">
+                {/* Scope toggle */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">Visibility</Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setScope("personal")}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                        scope === "personal"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      )}
+                    >
+                      <User className="h-3.5 w-3.5" />
+                      Personal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setScope("household")}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                        scope === "household"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      )}
+                    >
+                      <Users className="h-3.5 w-3.5" />
+                      Household
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {scope === "personal" ? "Only you can see this expense." : "Visible to all household members."}
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="edit-expense-name" className="text-sm font-medium text-foreground">
                     What was this for?
@@ -307,6 +350,42 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
 
             <form onSubmit={handleIncomeSubmit} id="edit-income-form" className="px-6 pb-6">
               <div className="space-y-5 pt-2">
+                {/* Scope toggle */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">Visibility</Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setScope("personal")}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                        scope === "personal"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      )}
+                    >
+                      <User className="h-3.5 w-3.5" />
+                      Personal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setScope("household")}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                        scope === "household"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      )}
+                    >
+                      <Users className="h-3.5 w-3.5" />
+                      Household
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {scope === "personal" ? "Only you can see this income." : "Visible to all household members."}
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="edit-income-desc" className="text-sm font-medium text-foreground">
                     Source / description

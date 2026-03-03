@@ -12,6 +12,7 @@ export interface Transaction {
   date: string // ISO date (YYYY-MM-DD)
   isPositive?: boolean
   paymentMethod: string
+  scope?: "personal" | "household" // default "personal"
   createdAt: string // ISO
   updatedAt: string // ISO
 }

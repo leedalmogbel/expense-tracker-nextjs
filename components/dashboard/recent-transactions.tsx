@@ -279,7 +279,19 @@ export function RecentTransactions() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-foreground">{tx.description}</p>
-                        <p className="text-xs text-muted-foreground">{tx.category}</p>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">{tx.category}</span>
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded px-1 py-0.5 text-[10px] font-medium leading-none",
+                              (tx.scope ?? "personal") === "household"
+                                ? "bg-primary/10 text-primary"
+                                : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {(tx.scope ?? "personal") === "household" ? "Household" : "Personal"}
+                          </span>
+                        </div>
                       </div>
                       <div className="min-w-0 shrink-0 text-right flex items-center gap-1">
                         <span>

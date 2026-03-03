@@ -11,9 +11,12 @@ import { Receipt, PieChart, Target, Wallet, ShoppingBasket } from "lucide-react"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 import { CreditCardDueBanner } from "@/components/dashboard/credit-card-due-banner"
 import { MobileFinanceSummary } from "@/components/dashboard/mobile-finance-summary"
+import { ScopeFilter } from "@/components/dashboard/scope-filter"
+import { useExpense } from "@/contexts/expense-context"
 
 export default function DashboardPage() {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
+  const { scopeFilter, setScopeFilter } = useExpense()
 
   return (
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
@@ -31,6 +34,9 @@ export default function DashboardPage() {
       >
         <motion.div variants={fadeUpItem}>
           <CreditCardDueBanner />
+        </motion.div>
+        <motion.div variants={fadeUpItem}>
+          <ScopeFilter value={scopeFilter} onChange={setScopeFilter} />
         </motion.div>
         {/* Mobile: compact unified summary */}
         <motion.div variants={fadeUpItem}>

@@ -20,6 +20,8 @@ import { useAuth } from "@/contexts/auth-context"
 import { syncSingleTransaction } from "@/lib/supabase-api"
 import { CATEGORIES, CATEGORY_ICONS, getCategoryLabel } from "@/lib/constants"
 import { toast } from "sonner"
+import { User, Users } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 function normalizePaymentKey(m: string) {
   return m.toLowerCase().replace(/\s+/g, "-")
@@ -39,6 +41,7 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
   const [category, setCategory] = useState<string>("")
   const [paymentMethod, setPaymentMethod] = useState<string>("Other")
   const [dateValue, setDateValue] = useState("")
+  const [scope, setScope] = useState<"personal" | "household">("personal")
 
   useEffect(() => {
     setDateValue(format(new Date(), "yyyy-MM-dd"))
@@ -69,6 +72,7 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
       date,
       isPositive: false,
       paymentMethod: paymentMethod || "Other",
+      scope,
     })
     toast.success("Expense added", { description: `${description} for ${currency.symbol}${amountNum.toFixed(2)}` })
     if (user && isSupabaseConfigured) {
@@ -78,6 +82,7 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
     onOpenChange(false)
     setCategory("")
     setPaymentMethod("Other")
+    setScope("personal")
     form.reset()
   }
 
@@ -95,6 +100,42 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
 
         <form onSubmit={handleSubmit} id="add-expense-form" className="px-6 pb-6">
           <div className="space-y-5 pt-2">
+            {/* Scope toggle */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Visibility</Label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setScope("personal")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    scope === "personal"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  <User className="h-3.5 w-3.5" />
+                  Personal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScope("household")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    scope === "household"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Household
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {scope === "personal" ? "Only you can see this expense." : "Visible to all household members."}
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="expense-name" className="text-sm font-medium text-foreground">
                 What was this for?

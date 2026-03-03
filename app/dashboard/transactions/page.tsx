@@ -9,10 +9,11 @@ import { useDashboardActions } from "@/contexts/dashboard-actions-context"
 import { useExpense } from "@/contexts/expense-context"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 import { ArrowUpRight, ArrowDownRight, Wallet } from "lucide-react"
+import { ScopeFilter } from "@/components/dashboard/scope-filter"
 
 export default function TransactionsPage() {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
-  const { setSelectedDate, totalBalance, monthlyIncome, monthlyExpenses, formatCurrency } = useExpense()
+  const { setSelectedDate, totalBalance, monthlyIncome, monthlyExpenses, formatCurrency, scopeFilter, setScopeFilter } = useExpense()
 
   // Clear day-specific filter on mount so full month view shows by default
   useEffect(() => {
@@ -36,6 +37,10 @@ export default function TransactionsPage() {
         initial="hidden"
         animate="visible"
       >
+        <motion.div variants={fadeUpItem}>
+          <ScopeFilter value={scopeFilter} onChange={setScopeFilter} />
+        </motion.div>
+
         {/* Balance summary */}
         <motion.div variants={fadeUpItem}>
           <div className="grid gap-3 grid-cols-1">

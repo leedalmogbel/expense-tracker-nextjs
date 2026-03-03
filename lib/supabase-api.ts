@@ -154,6 +154,7 @@ type TransactionRow = {
   transaction_date: string
   created_at: string
   app_id: string | null
+  scope: string | null
   accounts?: { name: string } | null
   categories?: { name: string; icon: string | null } | null
   account?: { name: string } | null
@@ -175,7 +176,7 @@ export async function fetchHouseholdTransactions(
   const { data: rows, error } = await supabase
     .from("transactions")
     .select(
-      "id, type, amount, note, transaction_date, created_at, app_id, account_id, category_id, accounts(name), categories(name, icon)"
+      "id, type, amount, note, transaction_date, created_at, app_id, scope, account_id, category_id, accounts(name), categories(name, icon)"
     )
     .eq("household_id", householdId)
     .order("transaction_date", { ascending: false })
@@ -199,6 +200,7 @@ export async function fetchHouseholdTransactions(
       icon,
       date: row.transaction_date,
       paymentMethod,
+      scope: (row.scope === "household" ? "household" : "personal") as "personal" | "household",
       createdAt: row.created_at,
       updatedAt: row.created_at,
     }
@@ -280,6 +282,7 @@ export async function syncTransactionsToHousehold(
       note: t.description || null,
       transaction_date: t.date,
       app_id: t.id,
+      scope: t.scope ?? "personal",
     }
 
     const existingDbId = existingAppIdMap.get(t.id)
@@ -416,6 +419,8 @@ export async function syncSingleTransaction(
     .limit(1)
     .maybeSingle()
 
+  const scope = transaction.scope ?? "personal"
+
   const row = {
     account_id: accountId,
     category_id: categoryId,
@@ -424,6 +429,7 @@ export async function syncSingleTransaction(
     amount: Math.abs(transaction.amount),
     note: transaction.description || null,
     transaction_date: transaction.date,
+    scope,
   }
 
   if (existing?.id) {
@@ -437,22 +443,24 @@ export async function syncSingleTransaction(
     })
     if (error) return { success: false, error: error.message }
 
-    // Notify other household members about the new transaction
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name")
-      .eq("id", userId)
-      .single()
-    const actorName = profile?.full_name ?? "Someone"
-    const amount = Math.abs(transaction.amount)
-    createNotificationForHousehold(
-      householdId,
-      "transaction_added",
-      type === "income" ? "Income Added" : "Expense Added",
-      `${actorName} added ${type === "income" ? "income" : "an expense"}: ${categoryName} — ${amount.toFixed(2)}`,
-      userId,
-      actorName
-    ).catch(() => {}) // fire-and-forget
+    // Only notify household members for household-scoped transactions
+    if (scope === "household") {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", userId)
+        .single()
+      const actorName = profile?.full_name ?? "Someone"
+      const amount = Math.abs(transaction.amount)
+      createNotificationForHousehold(
+        householdId,
+        "transaction_added",
+        type === "income" ? "Income Added" : "Expense Added",
+        `${actorName} added ${type === "income" ? "income" : "an expense"}: ${categoryName} — ${amount.toFixed(2)}`,
+        userId,
+        actorName
+      ).catch(() => {}) // fire-and-forget
+    }
   }
 
   return { success: true }
@@ -585,15 +593,15 @@ export async function getHouseholdInvites(
  */
 export async function getPendingInvitesForEmail(
   email: string
-): Promise<{ invites: { id: string; household_id: string; role: string }[]; error: string | null }> {
+): Promise<{ invites: { id: string; household_id: string; role: string; households?: { name: string } | null }[]; error: string | null }> {
   if (!supabase) return { invites: [], error: "Supabase is not configured." }
   const { data, error } = await supabase
     .from("household_invites")
-    .select("id, household_id, role")
+    .select("id, household_id, role, households(name)")
     .eq("email", email.toLowerCase().trim())
     .eq("status", "pending")
   if (error) return { invites: [], error: error.message }
-  return { invites: data ?? [], error: null }
+  return { invites: (data ?? []) as { id: string; household_id: string; role: string; households?: { name: string } | null }[], error: null }
 }
 
 /**
@@ -613,7 +621,8 @@ export async function getInviteById(
 }
 
 /**
- * Accept an invite: mark as accepted and add user to household_members.
+ * Accept an invite: uses a security-definer RPC to bypass RLS,
+ * adds user to household_members, and marks the invite as accepted.
  */
 export async function acceptInvite(
   inviteId: string,
@@ -621,40 +630,34 @@ export async function acceptInvite(
 ): Promise<{ error: string | null }> {
   if (!supabase) return { error: "Supabase is not configured." }
 
-  // Fetch the invite
-  const { invite, error: fetchError } = await getInviteById(inviteId)
-  if (fetchError || !invite) return { error: fetchError ?? "Invite not found." }
-  if (invite.status !== "pending") return { error: "This invite has already been used." }
+  // Use security-definer RPC to handle the accept atomically
+  const { error: rpcError } = await supabase.rpc("accept_household_invite", {
+    p_invite_id: inviteId,
+    p_user_id: userId,
+  })
+  if (rpcError) return { error: rpcError.message }
 
-  // Add user to household
-  const role = invite.role as "admin" | "member"
-  const { error: memberError } = await ensureHouseholdMember(invite.household_id, userId, role)
-  if (memberError) return { error: memberError }
-
-  // Mark invite as accepted
-  const { error: updateError } = await supabase
-    .from("household_invites")
-    .update({ status: "accepted" })
-    .eq("id", inviteId)
-  if (updateError) return { error: updateError.message }
-
-  // Fetch the new member's name for the notification
+  // Fetch the new member's name for the notification (fire-and-forget)
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name")
     .eq("id", userId)
     .single()
-  const memberName = profile?.full_name ?? invite.email
 
-  // Notify household members
-  createNotificationForHousehold(
-    invite.household_id,
-    "member_joined",
-    "New Member",
-    `${memberName} joined the household`,
-    userId,
-    memberName
-  ).catch(() => {}) // fire-and-forget
+  // Get the invite to know which household
+  const { invite } = await getInviteById(inviteId)
+  const memberName = profile?.full_name ?? invite?.email ?? "Someone"
+
+  if (invite) {
+    createNotificationForHousehold(
+      invite.household_id,
+      "member_joined",
+      "New Member",
+      `${memberName} joined the household`,
+      userId,
+      memberName
+    ).catch(() => {})
+  }
 
   return { error: null }
 }
