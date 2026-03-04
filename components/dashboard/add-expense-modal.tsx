@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Select, SelectItem } from "@/components/ui/select"
+import { PaymentMethodPicker } from "@/components/ui/payment-method-picker"
 import { useExpense } from "@/contexts/expense-context"
 import { useAuth } from "@/contexts/auth-context"
 import { syncSingleTransaction } from "@/lib/supabase-api"
@@ -22,10 +23,6 @@ import { CATEGORIES, CATEGORY_ICONS, getCategoryLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import { User, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-function normalizePaymentKey(m: string) {
-  return m.toLowerCase().replace(/\s+/g, "-")
-}
 
 const inputClass = "h-11 rounded-lg border border-input bg-background text-sm"
 
@@ -35,7 +32,7 @@ interface AddExpenseModalProps {
 }
 
 export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
-  const { addTransaction, paymentMethods, currency } = useExpense()
+  const { addTransaction, currency } = useExpense()
   const { user, isSupabaseConfigured } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [category, setCategory] = useState<string>("")
@@ -207,22 +204,7 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">Payment method</Label>
-                <Select
-                  placeholder="How did you pay?"
-                  classNames={{ trigger: inputClass }}
-                  selectedKeys={paymentMethod ? [normalizePaymentKey(paymentMethod)] : []}
-                  onSelectionChange={(keys) => {
-                    const v = Array.from(keys)[0]
-                    if (typeof v === "string") {
-                      const label = paymentMethods.find((m) => normalizePaymentKey(m) === v)
-                      setPaymentMethod(label ?? v)
-                    }
-                  }}
-                >
-                  {paymentMethods.map((m) => (
-                    <SelectItem key={normalizePaymentKey(m)}>{m}</SelectItem>
-                  ))}
-                </Select>
+                <PaymentMethodPicker value={paymentMethod} onChange={setPaymentMethod} />
               </div>
             </div>
 

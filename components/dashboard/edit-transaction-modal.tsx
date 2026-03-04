@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Select, SelectItem } from "@/components/ui/select"
+import { PaymentMethodPicker } from "@/components/ui/payment-method-picker"
 import { useExpense } from "@/contexts/expense-context"
 import { useAuth } from "@/contexts/auth-context"
 import { syncSingleTransaction } from "@/lib/supabase-api"
@@ -41,7 +42,7 @@ interface EditTransactionModalProps {
 }
 
 export function EditTransactionModal({ open, onOpenChange, transaction }: EditTransactionModalProps) {
-  const { updateTransactionById, paymentMethods, currency } = useExpense()
+  const { updateTransactionById, currency } = useExpense()
   const { user, isSupabaseConfigured } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -284,22 +285,7 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-foreground">Payment method</Label>
-                    <Select
-                      placeholder="How did you pay?"
-                      classNames={{ trigger: inputClass }}
-                      selectedKeys={paymentMethod ? [normalizePaymentKey(paymentMethod)] : []}
-                      onSelectionChange={(keys) => {
-                        const v = Array.from(keys)[0]
-                        if (typeof v === "string") {
-                          const label = paymentMethods.find((m) => normalizePaymentKey(m) === v)
-                          setPaymentMethod(label ?? v)
-                        }
-                      }}
-                    >
-                      {paymentMethods.map((m) => (
-                        <SelectItem key={normalizePaymentKey(m)}>{m}</SelectItem>
-                      ))}
-                    </Select>
+                    <PaymentMethodPicker value={paymentMethod} onChange={setPaymentMethod} />
                   </div>
                 </div>
 
@@ -442,22 +428,7 @@ export function EditTransactionModal({ open, onOpenChange, transaction }: EditTr
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-foreground">Payment method</Label>
-                    <Select
-                      placeholder="How received?"
-                      classNames={{ trigger: inputClass }}
-                      selectedKeys={incomePaymentMethod ? [normalizePaymentKey(incomePaymentMethod)] : []}
-                      onSelectionChange={(keys) => {
-                        const v = Array.from(keys)[0]
-                        if (typeof v === "string") {
-                          const label = paymentMethods.find((m) => normalizePaymentKey(m) === v)
-                          setIncomePaymentMethod(label ?? v)
-                        }
-                      }}
-                    >
-                      {paymentMethods.map((m) => (
-                        <SelectItem key={normalizePaymentKey(m)}>{m}</SelectItem>
-                      ))}
-                    </Select>
+                    <PaymentMethodPicker value={incomePaymentMethod} onChange={setIncomePaymentMethod} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">

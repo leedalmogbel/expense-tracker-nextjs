@@ -1,6 +1,6 @@
 "use client"
 
-import type { Transaction, MonthlyBudget, Currency, CreditCardReminder, ShoppingTrip } from "./types"
+import type { Transaction, MonthlyBudget, Currency, CreditCardReminder, CreditCardPayment, CreditCardInstallment, ShoppingTrip } from "./types"
 import { STORAGE_KEYS } from "./types"
 import { DEFAULT_CURRENCY } from "./constants"
 
@@ -135,6 +135,72 @@ export function updateCreditCardReminder(id: string, updates: Partial<CreditCard
 
 export function deleteCreditCardReminder(id: string): void {
   saveCreditCardReminders(getCreditCardReminders().filter((r) => r.id !== id))
+}
+
+// --- Credit Card Payments ---
+
+export function getCreditCardPayments(): CreditCardPayment[] {
+  return getItem<CreditCardPayment[]>(STORAGE_KEYS.CREDIT_CARD_PAYMENTS) ?? []
+}
+
+export function saveCreditCardPayments(payments: CreditCardPayment[]): void {
+  setItem(STORAGE_KEYS.CREDIT_CARD_PAYMENTS, payments)
+}
+
+export function addCreditCardPayment(
+  payment: Omit<CreditCardPayment, "id" | "createdAt" | "updatedAt">
+): CreditCardPayment {
+  const payments = getCreditCardPayments()
+  const now = new Date().toISOString()
+  const id = `ccpay-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newPayment: CreditCardPayment = { ...payment, id, createdAt: now, updatedAt: now }
+  saveCreditCardPayments([newPayment, ...payments])
+  return newPayment
+}
+
+export function updateCreditCardPayment(id: string, updates: Partial<CreditCardPayment>): void {
+  const payments = getCreditCardPayments()
+  const index = payments.findIndex((p) => p.id === id)
+  if (index === -1) return
+  payments[index] = { ...payments[index], ...updates, updatedAt: new Date().toISOString() }
+  saveCreditCardPayments(payments)
+}
+
+export function deleteCreditCardPayment(id: string): void {
+  saveCreditCardPayments(getCreditCardPayments().filter((p) => p.id !== id))
+}
+
+// --- Credit Card Installments ---
+
+export function getCreditCardInstallments(): CreditCardInstallment[] {
+  return getItem<CreditCardInstallment[]>(STORAGE_KEYS.CREDIT_CARD_INSTALLMENTS) ?? []
+}
+
+export function saveCreditCardInstallments(installments: CreditCardInstallment[]): void {
+  setItem(STORAGE_KEYS.CREDIT_CARD_INSTALLMENTS, installments)
+}
+
+export function addCreditCardInstallment(
+  installment: Omit<CreditCardInstallment, "id" | "createdAt" | "updatedAt">
+): CreditCardInstallment {
+  const installments = getCreditCardInstallments()
+  const now = new Date().toISOString()
+  const id = `inst-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newInst: CreditCardInstallment = { ...installment, id, createdAt: now, updatedAt: now }
+  saveCreditCardInstallments([newInst, ...installments])
+  return newInst
+}
+
+export function updateCreditCardInstallment(id: string, updates: Partial<CreditCardInstallment>): void {
+  const installments = getCreditCardInstallments()
+  const index = installments.findIndex((i) => i.id === id)
+  if (index === -1) return
+  installments[index] = { ...installments[index], ...updates, updatedAt: new Date().toISOString() }
+  saveCreditCardInstallments(installments)
+}
+
+export function deleteCreditCardInstallment(id: string): void {
+  saveCreditCardInstallments(getCreditCardInstallments().filter((i) => i.id !== id))
 }
 
 // --- Device ID (for Supabase sync) ---

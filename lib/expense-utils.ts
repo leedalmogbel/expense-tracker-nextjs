@@ -1,6 +1,6 @@
 "use client"
 
-import type { Transaction, MonthlyBudget, CreditCardReminder } from "./types"
+import type { Transaction, MonthlyBudget, CreditCardReminder, CreditCardPayment } from "./types"
 import { format, subMonths, startOfMonth, endOfMonth, parseISO } from "date-fns"
 
 /** Get current year/month */
@@ -275,6 +275,62 @@ export function getDueReminders(reminders: CreditCardReminder[]): CreditCardRemi
     let daysUntil = dueDay - currentDay
     if (daysUntil < 0) daysUntil += daysInMonth // wraps to next month
     return daysUntil >= 0 && daysUntil <= r.reminderDaysBefore
+  })
+}
+
+// --- Credit Card Payment Status ---
+
+export type CardPaymentStatus = "paid" | "unpaid" | "overdue"
+
+/** Determine payment status for a card in a given month */
+export function getCardPaymentStatus(
+  card: CreditCardReminder,
+  payment: CreditCardPayment | null,
+  year: number,
+  month: number
+): CardPaymentStatus {
+  if (payment) return "paid"
+
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+  const currentDay = now.getDate()
+
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const dueDay = Math.min(card.dueDay, daysInMonth)
+
+  // Past month with no payment = overdue
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    return "overdue"
+  }
+
+  // Current month, past due day = overdue
+  if (year === currentYear && month === currentMonth && currentDay > dueDay) {
+    return "overdue"
+  }
+
+  return "unpaid"
+}
+
+/** Get all cards with their payment status for a given month */
+export function getCardsWithPaymentStatus(
+  cards: CreditCardReminder[],
+  payments: CreditCardPayment[],
+  year: number,
+  month: number
+): Array<{
+  card: CreditCardReminder
+  payment: CreditCardPayment | null
+  status: CardPaymentStatus
+}> {
+  return cards.map((card) => {
+    const payment =
+      payments.find((p) => p.cardId === card.id && p.year === year && p.month === month) ?? null
+    return {
+      card,
+      payment,
+      status: getCardPaymentStatus(card, payment, year, month),
+    }
   })
 }
 

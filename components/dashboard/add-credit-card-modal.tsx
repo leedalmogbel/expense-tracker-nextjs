@@ -38,6 +38,7 @@ interface AddCreditCardModalProps {
 export function AddCreditCardModal({ open, onOpenChange, editingCard, onSaved }: AddCreditCardModalProps) {
   const [name, setName] = useState("")
   const [lastFour, setLastFour] = useState("")
+  const [creditLimit, setCreditLimit] = useState("")
   const [dueDay, setDueDay] = useState(15)
   const [reminderDays, setReminderDays] = useState(3)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -48,11 +49,13 @@ export function AddCreditCardModal({ open, onOpenChange, editingCard, onSaved }:
     if (open && editingCard) {
       setName(editingCard.name)
       setLastFour(editingCard.lastFourDigits ?? "")
+      setCreditLimit(editingCard.creditLimit ? String(editingCard.creditLimit) : "")
       setDueDay(editingCard.dueDay)
       setReminderDays(editingCard.reminderDaysBefore)
     } else if (open) {
       setName("")
       setLastFour("")
+      setCreditLimit("")
       setDueDay(15)
       setReminderDays(3)
     }
@@ -64,10 +67,12 @@ export function AddCreditCardModal({ open, onOpenChange, editingCard, onSaved }:
 
     setIsSubmitting(true)
 
+    const parsedLimit = parseFloat(creditLimit)
     if (isEditing && editingCard) {
       updateCreditCardReminder(editingCard.id, {
         name: name.trim(),
         lastFourDigits: lastFour.trim() || undefined,
+        creditLimit: parsedLimit > 0 ? parsedLimit : undefined,
         dueDay,
         reminderDaysBefore: reminderDays,
       })
@@ -75,6 +80,7 @@ export function AddCreditCardModal({ open, onOpenChange, editingCard, onSaved }:
       addCreditCardReminder({
         name: name.trim(),
         lastFourDigits: lastFour.trim() || undefined,
+        creditLimit: parsedLimit > 0 ? parsedLimit : undefined,
         dueDay,
         reminderDaysBefore: reminderDays,
         isActive: true,
@@ -131,6 +137,22 @@ export function AddCreditCardModal({ open, onOpenChange, editingCard, onSaved }:
                 className={inputClass}
                 value={lastFour}
                 onChange={(e) => setLastFour(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="card-credit-limit" className="text-sm font-medium text-foreground">
+                Credit limit <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="card-credit-limit"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="e.g. 80000"
+                className={inputClass}
+                value={creditLimit}
+                onChange={(e) => setCreditLimit(e.target.value)}
               />
             </div>
 

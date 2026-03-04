@@ -302,7 +302,7 @@ export function DashboardSidebar() {
       <DropdownItem
         key="profile"
         startContent={<User className="h-4 w-4 shrink-0" />}
-        onPress={() => router.push("/dashboard/settings")}
+        onPress={() => router.push("/dashboard/profile")}
         className="py-2"
       >
         Profile
