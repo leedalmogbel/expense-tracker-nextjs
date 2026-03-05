@@ -2,17 +2,14 @@
 
 import { useState, useCallback } from "react"
 import { motion } from "framer-motion"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { CreditCardList } from "@/components/dashboard/credit-card-list"
 import { AddCreditCardModal } from "@/components/dashboard/add-credit-card-modal"
-import { useDashboardActions } from "@/contexts/dashboard-actions-context"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import type { CreditCardReminder } from "@/lib/types"
 
 export default function CardsPage() {
-  const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
   const [addCardOpen, setAddCardOpen] = useState(false)
   const [editingCard, setEditingCard] = useState<CreditCardReminder | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
@@ -28,12 +25,7 @@ export default function CardsPage() {
 
   return (
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
-      <DashboardHeader
-        onAddExpense={() => openAddExpenseRef.current?.()}
-        onAddBudget={() => openAddBudgetRef.current?.()}
-        onAddIncome={() => openAddIncomeRef.current?.()}
-      />
-      <div className="flex items-center justify-between mt-1">
+      <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Manage credit cards and set payment due date reminders.
         </p>

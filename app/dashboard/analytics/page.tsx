@@ -2,11 +2,9 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { SpendingChart } from "@/components/dashboard/spending-chart"
 import { AnalyticsBarChart } from "@/components/dashboard/analytics-bar-chart"
 import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
-import { useDashboardActions } from "@/contexts/dashboard-actions-context"
 import { useExpense } from "@/contexts/expense-context"
 import { staggerContainer, fadeUpItem, cn } from "@/lib/utils"
 import { ArrowUpRight, ArrowDownRight } from "lucide-react"
@@ -15,18 +13,12 @@ const PERIODS = ["Daily", "Weekly", "Monthly", "Year"] as const
 type Period = (typeof PERIODS)[number]
 
 export default function AnalyticsPage() {
-  const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
   const { monthlyIncome, monthlyExpenses, formatCurrency } = useExpense()
   const [period, setPeriod] = useState<Period>("Monthly")
 
   return (
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
-      <DashboardHeader
-        onAddExpense={() => openAddExpenseRef.current?.()}
-        onAddBudget={() => openAddBudgetRef.current?.()}
-        onAddIncome={() => openAddIncomeRef.current?.()}
-      />
-      <p className="mt-1 text-sm text-muted-foreground min-h-[1.5em]">
+      <p className="text-sm text-muted-foreground min-h-[1.5em]">
         Income vs expenses over time and spending by category.
       </p>
 

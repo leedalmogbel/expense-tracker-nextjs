@@ -9,6 +9,7 @@ import { AddExpenseModal } from "@/components/dashboard/add-expense-modal"
 import { AddBudgetModal } from "@/components/dashboard/add-budget-modal"
 import { AddIncomeModal } from "@/components/dashboard/add-income-modal"
 import { PendingInviteBanner } from "@/components/dashboard/pending-invite-banner"
+import { FloatingAddButton } from "@/components/dashboard/floating-add-button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { getCreditCardReminders } from "@/lib/storage"
@@ -75,6 +76,7 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      <FloatingAddButton />
       <AddExpenseModal open={addExpenseOpen} onOpenChange={setAddExpenseOpen} />
       <AddBudgetModal open={addBudgetOpen} onOpenChange={setAddBudgetOpen} />
       <AddIncomeModal open={addIncomeOpen} onOpenChange={setAddIncomeOpen} />

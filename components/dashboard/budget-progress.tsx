@@ -81,8 +81,11 @@ export function BudgetProgress({ onManage }: BudgetProgressProps) {
                 </div>
                 <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className={`h-full rounded-full transition-all ${isOver ? "bg-destructive" : row.color}`}
-                    style={{ width: `${percentage}%` }}
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${percentage}%`,
+                      backgroundColor: isOver ? "hsl(var(--destructive))" : row.color,
+                    }}
                   />
                 </div>
               </div>

@@ -2,11 +2,9 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { BudgetExpenseCards } from "@/components/dashboard/budget-expense-cards"
 import { StatCards } from "@/components/dashboard/stat-cards"
 import { ActivityFeed } from "@/components/dashboard/activity-feed"
-import { useDashboardActions } from "@/contexts/dashboard-actions-context"
 import { Receipt, PieChart, Target, Wallet, ShoppingBasket } from "lucide-react"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 import { CreditCardDueBanner } from "@/components/dashboard/credit-card-due-banner"
@@ -15,16 +13,10 @@ import { ScopeFilter } from "@/components/dashboard/scope-filter"
 import { useExpense } from "@/contexts/expense-context"
 
 export default function DashboardPage() {
-  const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
   const { scopeFilter, setScopeFilter } = useExpense()
 
   return (
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
-      <DashboardHeader
-        onAddExpense={() => openAddExpenseRef.current?.()}
-        onAddBudget={() => openAddBudgetRef.current?.()}
-        onAddIncome={() => openAddIncomeRef.current?.()}
-      />
 
       <motion.div
         className="mt-8 space-y-6"

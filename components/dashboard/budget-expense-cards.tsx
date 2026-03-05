@@ -1,10 +1,8 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { useExpense } from "@/contexts/expense-context"
 import { Wallet, Calendar } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 export function BudgetExpenseCards() {
   const { currency, currentBudget, monthlyExpenses, spentToday, year, month } = useExpense()
@@ -36,10 +34,15 @@ export function BudgetExpenseCards() {
           </p>
           {budgetTotal > 0 && (
             <>
-              <Progress
-                value={spentPct}
-                className={cn("mt-3 h-2", isOverBudget && "[&_[data-slot=indicator]]:bg-destructive")}
-              />
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${spentPct}%`,
+                    backgroundColor: isOverBudget ? "hsl(var(--destructive))" : "hsl(var(--primary))",
+                  }}
+                />
+              </div>
               <p className={`text-xs font-medium mt-1.5 ${isOverBudget ? "text-destructive" : "text-muted-foreground"}`}>
                 {spentPct.toFixed(0)}% used
               </p>

@@ -97,12 +97,12 @@ export function getBudgetProgress(
   const spentByCat = getSpendingByCategory(transactions, year, month)
   const spentMap = Object.fromEntries(spentByCat.map((s) => [s.category, s.amount]))
   const colors = [
-    "bg-primary",
-    "bg-[hsl(var(--chart-3))]",
-    "bg-[hsl(var(--chart-2))]",
-    "bg-[hsl(var(--chart-5))]",
-    "bg-[hsl(var(--chart-4))]",
-    "bg-[hsl(var(--chart-2))]",
+    "hsl(var(--primary))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-5))",
+    "hsl(var(--chart-4))",
+    "hsl(var(--chart-1))",
   ]
   return currentBudget.categoryBudgets.map((cb, i) => ({
     category: cb.category,
