@@ -90,7 +90,14 @@ export function HouseholdSettings() {
     setCopiedId(inviteId)
     setTimeout(() => setCopiedId(null), 3000)
 
-    toast.success("Invite created", { description: `Link copied for ${inviteEmail.trim()}` })
+    toast.success("Invite sent!", { description: `Email sent & link copied for ${inviteEmail.trim()}` })
+
+    // Send invitation email (fire-and-forget)
+    fetch("/api/invites/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: inviteEmail.trim(), inviteId, inviterName: actorName }),
+    }).catch(() => {})
     setInviteEmail("")
     loadData()
   }

@@ -797,7 +797,7 @@ export type AppNotification = {
   id: string
   user_id: string
   household_id: string
-  type: "invite_sent" | "member_joined" | "transaction_added"
+  type: "invite_sent" | "member_joined" | "transaction_added" | "card_due" | "card_overdue" | "budget_threshold" | "shopping_reminder"
   title: string
   message: string
   actor_name: string | null

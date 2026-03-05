@@ -1,7 +1,8 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react"
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { useAuth } from "./auth-context"
+import { useExpense } from "./expense-context"
 import {
   fetchNotifications,
   markNotificationRead,
@@ -9,6 +10,7 @@ import {
   type AppNotification,
 } from "@/lib/supabase-api"
 import { isSupabaseConfigured } from "@/lib/supabase"
+import { generateAllLocalNotifications, dismissLocalNotification } from "@/lib/local-notifications"
 
 const POLL_INTERVAL = 30_000 // 30 seconds
 
@@ -25,21 +27,23 @@ const NotificationContext = createContext<NotificationContextValue | null>(null)
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
-  const [notifications, setNotifications] = useState<AppNotification[]>([])
+  const { budgetProgress } = useExpense()
+  const [supabaseNotifications, setSupabaseNotifications] = useState<AppNotification[]>([])
+  const [localNotifications, setLocalNotifications] = useState<AppNotification[]>([])
   const [loading, setLoading] = useState(true)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const loadNotifications = useCallback(async () => {
     if (!user || !isSupabaseConfigured()) return
     const { notifications: data } = await fetchNotifications(user.id)
-    setNotifications(data)
+    setSupabaseNotifications(data)
     setLoading(false)
   }, [user])
 
-  // Initial load + polling
+  // Initial load + polling for Supabase notifications
   useEffect(() => {
     if (!user || !isSupabaseConfigured()) {
-      setNotifications([])
+      setSupabaseNotifications([])
       setLoading(false)
       return
     }
@@ -51,25 +55,53 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, [user, loadNotifications])
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  // Generate local notifications from localStorage data
+  useEffect(() => {
+    const generate = () => {
+      setLocalNotifications(generateAllLocalNotifications(budgetProgress))
+    }
+    generate()
+    const id = setInterval(generate, POLL_INTERVAL)
+    return () => clearInterval(id)
+  }, [budgetProgress])
+
+  // Merge: local first (more urgent), then Supabase
+  const allNotifications = useMemo(
+    () => [...localNotifications, ...supabaseNotifications],
+    [localNotifications, supabaseNotifications]
+  )
+
+  const unreadCount = allNotifications.filter((n) => !n.read).length
 
   const markAsRead = useCallback(
     async (id: string) => {
-      await markNotificationRead(id)
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+      if (id.startsWith("local-")) {
+        dismissLocalNotification(id)
+        setLocalNotifications((prev) => prev.filter((n) => n.id !== id))
+      } else {
+        await markNotificationRead(id)
+        setSupabaseNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+      }
     },
     []
   )
 
   const markAllRead = useCallback(async () => {
-    if (!user) return
-    await markAllNotificationsRead(user.id)
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }, [user])
+    // Dismiss all local
+    for (const n of localNotifications) {
+      dismissLocalNotification(n.id)
+    }
+    setLocalNotifications([])
+    // Mark all Supabase as read
+    if (user) {
+      await markAllNotificationsRead(user.id)
+      setSupabaseNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    }
+  }, [user, localNotifications])
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, loading, markAsRead, markAllRead, refresh: loadNotifications }}
+      value={{ notifications: allNotifications, unreadCount, loading, markAsRead, markAllRead, refresh: loadNotifications }}
     >
       {children}
     </NotificationContext.Provider>

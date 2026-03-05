@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, UserPlus, UserCheck, Receipt, CheckCheck } from "lucide-react"
+import { Bell, UserPlus, UserCheck, Receipt, CheckCheck, CreditCard, Target, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { useNotifications } from "@/contexts/notification-context"
@@ -11,12 +11,20 @@ const TYPE_ICON: Record<string, typeof UserPlus> = {
   invite_sent: UserPlus,
   member_joined: UserCheck,
   transaction_added: Receipt,
+  card_due: CreditCard,
+  card_overdue: CreditCard,
+  budget_threshold: Target,
+  shopping_reminder: ShoppingCart,
 }
 
 const TYPE_COLOR: Record<string, string> = {
   invite_sent: "text-blue-500 bg-blue-500/10",
   member_joined: "text-primary bg-primary/10",
   transaction_added: "text-amber-500 bg-amber-500/10",
+  card_due: "text-amber-500 bg-amber-500/10",
+  card_overdue: "text-destructive bg-destructive/10",
+  budget_threshold: "text-orange-500 bg-orange-500/10",
+  shopping_reminder: "text-blue-400 bg-blue-400/10",
 }
 
 export function NotificationPopover() {

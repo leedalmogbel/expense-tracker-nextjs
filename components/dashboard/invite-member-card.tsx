@@ -36,7 +36,14 @@ export function InviteMemberCard({
     await navigator.clipboard.writeText(link)
     setJustCopied(true)
     setTimeout(() => setJustCopied(false), 3000)
-    toast.success("Invite created", { description: `Link copied for ${email.trim()}` })
+    toast.success("Invite sent!", { description: `Email sent & link copied for ${email.trim()}` })
+
+    // Send invitation email (fire-and-forget)
+    fetch("/api/invites/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), inviteId, inviterName: actorName }),
+    }).catch(() => {})
     setEmail("")
     onInviteCreated()
   }
