@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { Transaction, MonthlyBudget, Currency } from "@/lib/types"
+import type { Transaction, MonthlyBudget, Currency, TagMapping, RecurringTransaction } from "@/lib/types"
 import {
   getTransactions,
   saveTransactions,
@@ -16,6 +16,13 @@ import {
   addTransaction as storageAddTransaction,
   updateTransaction,
   deleteTransaction,
+  getTagMappings as storageGetTagMappings,
+  saveTagMappings as storageSaveTagMappings,
+  getRecurringTransactions as storageGetRecurring,
+  saveRecurringTransactions as storageSaveRecurring,
+  addRecurringTransaction as storageAddRecurring,
+  updateRecurringTransaction as storageUpdateRecurring,
+  deleteRecurringTransaction as storageDeleteRecurring,
 } from "@/lib/storage"
 import {
   getCurrentYearMonth,
@@ -34,9 +41,13 @@ import {
   getIncomeChartData,
   getAverageMonthlyIncome,
   getIncomeByCategory,
+  getSpendingByTag,
+  getMonthlySavings,
+  getSavingsRate,
+  getPendingBills,
 } from "@/lib/expense-utils"
 import { format } from "date-fns"
-import { CATEGORY_ICONS, PAYMENT_METHODS } from "@/lib/constants"
+import { CATEGORY_ICONS, PAYMENT_METHODS, DEFAULT_TAG_MAPPINGS } from "@/lib/constants"
 
 type MonthFilter = { year: number; month: number } | null
 
@@ -86,6 +97,21 @@ type ExpenseContextValue = {
   incomeChartData: { month: string; monthKey: string; year: number; monthNum: number; income: number }[]
   averageMonthlyIncome: number
   incomeByCategoryData: { category: string; amount: number }[]
+  // Tag system
+  tagMappings: TagMapping[]
+  setTagMappings: (mappings: TagMapping[]) => void
+  tagBreakdown: { tag: string; label: string; amount: number; color: string }[]
+  selectedTagFilter: string | null
+  setSelectedTagFilter: (v: string | null) => void
+  // Recurring transactions
+  recurringTransactions: RecurringTransaction[]
+  addRecurringTx: (item: Omit<RecurringTransaction, "id" | "createdAt" | "updatedAt">) => RecurringTransaction
+  updateRecurringTx: (id: string, updates: Partial<RecurringTransaction>) => void
+  deleteRecurringTx: (id: string) => void
+  pendingBills: { recurring: RecurringTransaction; isPaid: boolean }[]
+  // Savings
+  monthlySavings: number
+  savingsRate: number
 }
 
 const ExpenseContext = React.createContext<ExpenseContextValue | null>(null)
@@ -150,6 +176,37 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
   const [dateRangeFilter, setDateRangeFilter] = React.useState<{ start: string; end: string } | null>(null)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [scopeFilter, setScopeFilter] = React.useState<"all" | "personal" | "household">("all")
+  const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null)
+
+  // Tag mappings
+  const [tagMappings, setTagMappingsState] = React.useState<TagMapping[]>(() => {
+    const stored = storageGetTagMappings()
+    if (stored.length === 0) {
+      storageSaveTagMappings(DEFAULT_TAG_MAPPINGS)
+      return DEFAULT_TAG_MAPPINGS
+    }
+    return stored
+  })
+  const setTagMappings = React.useCallback((mappings: TagMapping[]) => {
+    storageSaveTagMappings(mappings)
+    setTagMappingsState(mappings)
+  }, [])
+
+  // Recurring transactions
+  const [recurringTransactions, setRecurringTransactionsState] = React.useState<RecurringTransaction[]>(() => storageGetRecurring())
+  const addRecurringTx = React.useCallback((item: Omit<RecurringTransaction, "id" | "createdAt" | "updatedAt">) => {
+    const newItem = storageAddRecurring(item)
+    setRecurringTransactionsState(storageGetRecurring())
+    return newItem
+  }, [])
+  const updateRecurringTx = React.useCallback((id: string, updates: Partial<RecurringTransaction>) => {
+    storageUpdateRecurring(id, updates)
+    setRecurringTransactionsState(storageGetRecurring())
+  }, [])
+  const deleteRecurringTx = React.useCallback((id: string) => {
+    storageDeleteRecurring(id)
+    setRecurringTransactionsState(storageGetRecurring())
+  }, [])
 
   const refresh = React.useCallback(() => {
     setTransactions(getTransactions())
@@ -216,6 +273,22 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     () => getIncomeByCategory(transactions, year, month),
     [transactions, year, month]
   )
+  const tagBreakdown = React.useMemo(
+    () => getSpendingByTag(transactions, tagMappings, year, month),
+    [transactions, tagMappings, year, month]
+  )
+  const monthlySavings = React.useMemo(
+    () => getMonthlySavings(transactions, year, month),
+    [transactions, year, month]
+  )
+  const savingsRate = React.useMemo(
+    () => getSavingsRate(monthlyIncome, monthlyExpenses),
+    [monthlyIncome, monthlyExpenses]
+  )
+  const pendingBills = React.useMemo(
+    () => getPendingBills(recurringTransactions, transactions, year, month),
+    [recurringTransactions, transactions, year, month]
+  )
   const filteredTransactions = React.useMemo(() => {
     let list: Transaction[]
     if (dateRangeFilter) {
@@ -232,6 +305,15 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
       const norm = selectedCategoryFilter.toLowerCase()
       list = list.filter((t) => normalizeCategory(t.category) === norm)
     }
+    if (selectedTagFilter != null && selectedTagFilter !== "all") {
+      const tagMapping = tagMappings.find((m) => m.tag === selectedTagFilter)
+      if (tagMapping) {
+        list = list.filter((t) => {
+          const txTag = t.tag || tagMappings.find((m) => m.categories.includes(t.category))?.tag
+          return txTag === selectedTagFilter
+        })
+      }
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase()
       list = list.filter(
@@ -242,7 +324,7 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
       )
     }
     return list.sort((a, b) => (b.date === a.date ? (b.updatedAt?.localeCompare(a.updatedAt) ?? 0) : b.date.localeCompare(a.date)))
-  }, [transactions, filterYear, filterMonth, selectedDate, selectedCategoryFilter, searchQuery, dateRangeFilter, scopeFilter])
+  }, [transactions, filterYear, filterMonth, selectedDate, selectedCategoryFilter, selectedTagFilter, tagMappings, searchQuery, dateRangeFilter, scopeFilter])
   const groupedTransactions = React.useMemo(
     () => groupTransactionsByDate(filteredTransactions, (dateStr) => formatRelativeDate(dateStr)),
     [filteredTransactions]
@@ -332,6 +414,18 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     incomeChartData,
     averageMonthlyIncome,
     incomeByCategoryData,
+    tagMappings,
+    setTagMappings,
+    tagBreakdown,
+    selectedTagFilter,
+    setSelectedTagFilter,
+    recurringTransactions,
+    addRecurringTx,
+    updateRecurringTx,
+    deleteRecurringTx,
+    pendingBills,
+    monthlySavings,
+    savingsRate,
   }), [
     transactions, currentBudget, currency, year, month,
     currentMonthTransactions, monthlyIncome, monthlyExpenses, totalBalance, spentToday,
@@ -343,6 +437,9 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     prevMonthIncome, prevMonthExpenses, searchQuery, scopeFilter, paymentMethods,
     addPaymentMethod, removePaymentMethod,
     incomeTransactions, incomeChartData, averageMonthlyIncome, incomeByCategoryData,
+    tagMappings, setTagMappings, tagBreakdown, selectedTagFilter,
+    recurringTransactions, addRecurringTx, updateRecurringTx, deleteRecurringTx,
+    pendingBills, monthlySavings, savingsRate,
   ])
 
   return <ExpenseContext.Provider value={value}>{children}</ExpenseContext.Provider>

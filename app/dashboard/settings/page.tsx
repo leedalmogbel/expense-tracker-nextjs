@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/dialog"
 import { useExpense } from "@/contexts/expense-context"
 import { useAuth } from "@/contexts/auth-context"
-import { CURRENCIES } from "@/lib/constants"
+import { CURRENCIES, CATEGORIES, DEFAULT_TAG_MAPPINGS } from "@/lib/constants"
+import type { TagMapping, RecurringTransaction } from "@/lib/types"
+import { Checkbox } from "@/components/ui/checkbox"
 import { buildCsv, downloadCsv } from "@/lib/export-csv"
 import { syncToSupabase } from "@/lib/sync-to-supabase"
 import { syncToHousehold } from "@/lib/supabase-api"
@@ -30,8 +32,6 @@ import {
   Trash2,
   LogOut,
   CheckCircle2,
-  Repeat,
-  PiggyBank,
   Users,
   Camera,
   Shield,
@@ -42,6 +42,12 @@ import {
   Sparkles,
   Settings,
   ChevronRight,
+  Tag,
+  Repeat,
+  Pencil,
+  ChevronDown,
+  ChevronUp,
+  CalendarDays,
 } from "lucide-react"
 import { HouseholdSettings } from "@/components/dashboard/household-settings"
 
@@ -64,9 +70,16 @@ export default function SettingsPage() {
     currentBudget,
     currency,
     setCurrency,
+    formatCurrency,
     paymentMethods,
     addPaymentMethod,
     removePaymentMethod,
+    tagMappings,
+    setTagMappings,
+    recurringTransactions,
+    addRecurringTx,
+    updateRecurringTx,
+    deleteRecurringTx,
   } = useExpense()
   const { user, signInWithGoogle, signOut, loading: authLoading, isSupabaseConfigured: supabaseAuthConfigured } = useAuth()
   const [supabaseOpen, setSupabaseOpen] = useState(false)
@@ -76,6 +89,30 @@ export default function SettingsPage() {
   const [syncSuccess, setSyncSuccess] = useState(false)
   const [newPaymentMethod, setNewPaymentMethod] = useState("")
   const [googleLoading, setGoogleLoading] = useState(false)
+
+  // Expense Tags state
+  const [expandedTag, setExpandedTag] = useState<string | null>(null)
+  const [addTagOpen, setAddTagOpen] = useState(false)
+  const [newTagName, setNewTagName] = useState("")
+  const [newTagColor, setNewTagColor] = useState("hsl(var(--chart-1))")
+  const defaultTagKeys = useMemo(() => new Set(DEFAULT_TAG_MAPPINGS.map((t) => t.tag)), [])
+
+  // Recurring Bills state
+  const [recurringOpen, setRecurringOpen] = useState(false)
+  const [editingRecurring, setEditingRecurring] = useState<RecurringTransaction | null>(null)
+  const [recurringForm, setRecurringForm] = useState<{
+    description: string
+    amount: string
+    category: string
+    paymentMethod: string
+    dueDay: string
+  }>({
+    description: "",
+    amount: "",
+    category: CATEGORIES[0],
+    paymentMethod: "",
+    dueDay: "1",
+  })
 
   useEffect(() => {
     if (supabaseOpen && user?.email) setEmail(user.email)
@@ -173,6 +210,229 @@ export default function SettingsPage() {
                     </SelectItem>
                   ))}
                 </Select>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Expense Tags */}
+          <motion.div variants={fadeUpItem}>
+            <Card className="border-border">
+              <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-1))]/10 text-[hsl(var(--chart-1))]">
+                    <Tag className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                      Expense Tags
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {tagMappings.length} tag{tagMappings.length !== 1 ? "s" : ""} with category assignments
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 rounded-lg"
+                    onClick={() => setAddTagOpen(true)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add Tag
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 py-5 sm:px-6 sm:py-6 space-y-2">
+                {tagMappings.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No tags configured yet.</p>
+                ) : (
+                  tagMappings.map((mapping) => {
+                    const isExpanded = expandedTag === mapping.tag
+                    return (
+                      <div key={mapping.tag} className="rounded-lg border border-border overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedTag(isExpanded ? null : mapping.tag)}
+                          className="flex items-center gap-3 w-full p-3 transition-colors hover:bg-muted/30 text-left"
+                        >
+                          <span
+                            className="h-3 w-3 rounded-full shrink-0"
+                            style={{ backgroundColor: mapping.color }}
+                          />
+                          <span className="text-sm font-medium text-foreground flex-1">{mapping.label}</span>
+                          <span className="text-xs text-muted-foreground mr-2">
+                            {mapping.categories.length > 0
+                              ? mapping.categories.join(", ")
+                              : "No categories"}
+                          </span>
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                          )}
+                        </button>
+                        {isExpanded && (
+                          <div className="border-t border-border px-3 py-3 bg-muted/10">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Assign categories:</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {CATEGORIES.map((cat) => {
+                                const isChecked = mapping.categories.includes(cat)
+                                return (
+                                  <label
+                                    key={cat}
+                                    className="flex items-center gap-2 text-sm text-foreground cursor-pointer rounded-md px-2 py-1.5 hover:bg-muted/30 transition-colors"
+                                  >
+                                    <Checkbox
+                                      checked={isChecked}
+                                      onCheckedChange={(checked: boolean) => {
+                                        const updated = tagMappings.map((m) => {
+                                          if (m.tag !== mapping.tag) {
+                                            // If checked, remove this category from other tags
+                                            if (checked) {
+                                              return {
+                                                ...m,
+                                                categories: m.categories.filter((c) => c !== cat),
+                                              }
+                                            }
+                                            return m
+                                          }
+                                          // Toggle on current tag
+                                          return {
+                                            ...m,
+                                            categories: checked
+                                              ? [...m.categories, cat]
+                                              : m.categories.filter((c) => c !== cat),
+                                          }
+                                        })
+                                        setTagMappings(updated)
+                                        toast.success(
+                                          checked ? `Added "${cat}" to ${mapping.label}` : `Removed "${cat}" from ${mapping.label}`
+                                        )
+                                      }}
+                                    />
+                                    {cat}
+                                  </label>
+                                )
+                              })}
+                            </div>
+                            {!defaultTagKeys.has(mapping.tag) && (
+                              <div className="mt-3 pt-3 border-t border-border">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                                  onClick={() => {
+                                    setTagMappings(tagMappings.filter((m) => m.tag !== mapping.tag))
+                                    setExpandedTag(null)
+                                    toast.success(`Tag "${mapping.label}" removed`)
+                                  }}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  Remove Tag
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Recurring Bills */}
+          <motion.div variants={fadeUpItem}>
+            <Card className="border-border">
+              <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]">
+                    <Repeat className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                      Recurring Bills
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {recurringTransactions.length} recurring bill{recurringTransactions.length !== 1 ? "s" : ""} configured
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 py-5 sm:px-6 sm:py-6 space-y-3">
+                {recurringTransactions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No recurring bills yet. Add one to auto-track monthly expenses.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {recurringTransactions.map((bill) => (
+                      <div
+                        key={bill.id}
+                        className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 p-3 transition-all hover:border-primary/20 hover:bg-muted/30"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]">
+                          <CalendarDays className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground truncate">{bill.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatCurrency(-Math.abs(bill.amount)).replace("+", "")} &middot; {bill.category} &middot; Due day {bill.dueDay}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingRecurring(bill)
+                              setRecurringForm({
+                                description: bill.description,
+                                amount: String(Math.abs(bill.amount)),
+                                category: bill.category,
+                                paymentMethod: bill.paymentMethod,
+                                dueDay: String(bill.dueDay),
+                              })
+                              setRecurringOpen(true)
+                            }}
+                            className="rounded-md p-1.5 text-muted-foreground/60 transition-colors hover:bg-primary/10 hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                            aria-label={`Edit ${bill.description}`}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              deleteRecurringTx(bill.id)
+                              toast.success("Recurring bill removed", { description: bill.description })
+                            }}
+                            className="rounded-md p-1.5 text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                            aria-label={`Delete ${bill.description}`}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  type="button"
+                  className="h-10 gap-1.5 rounded-lg px-4"
+                  onClick={() => {
+                    setEditingRecurring(null)
+                    setRecurringForm({
+                      description: "",
+                      amount: "",
+                      category: CATEGORIES[0],
+                      paymentMethod: paymentMethods[0] ?? "",
+                      dueDay: "1",
+                    })
+                    setRecurringOpen(true)
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Recurring Bill
+                </Button>
               </CardContent>
             </Card>
           </motion.div>
@@ -405,8 +665,6 @@ export default function SettingsPage() {
               <CardContent className="px-4 py-5 sm:px-6 sm:py-6">
                 <div className="space-y-1">
                   {[
-                    { icon: Repeat, title: "Recurring Transactions", desc: "Auto-log monthly bills like rent and subscriptions", color: "bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]" },
-                    { icon: PiggyBank, title: "Savings Goals", desc: "Track progress toward specific savings targets", color: "bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]" },
                     { icon: Users, title: "Expense Splitting", desc: "Split individual expenses with friends or household", color: "bg-[hsl(var(--chart-4))]/10 text-[hsl(var(--chart-4))]" },
                     { icon: Camera, title: "Receipt Scanner", desc: "OCR to auto-fill expense details from photos", color: "bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]" },
                     { icon: Shield, title: "Financial Health Score", desc: "Scoring based on savings rate and budget adherence", color: "bg-primary/10 text-primary" },
@@ -430,6 +688,252 @@ export default function SettingsPage() {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Add Tag Dialog */}
+      <Dialog open={addTagOpen} onOpenChange={setAddTagOpen}>
+        <DialogContent className="sm:max-w-md gap-0 overflow-hidden rounded-xl border-border p-0 shadow-2xl">
+          <DialogHeader className="px-6 pt-6 pb-4">
+            <DialogTitle className="font-heading text-xl font-semibold tracking-tight">
+              Add Custom Tag
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              Create a new super-category tag for organizing expenses.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 px-6 pb-6">
+            <div className="space-y-2">
+              <Label htmlFor="tag-name" className="text-sm font-medium text-foreground">
+                Tag Name
+              </Label>
+              <Input
+                id="tag-name"
+                placeholder="e.g. Side Hustle"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                className="h-11 rounded-lg border-input bg-background text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Color</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "hsl(var(--chart-1))",
+                  "hsl(var(--chart-2))",
+                  "hsl(var(--chart-3))",
+                  "hsl(var(--chart-4))",
+                  "hsl(var(--chart-5))",
+                  "hsl(var(--primary))",
+                  "hsl(200, 70%, 50%)",
+                  "hsl(30, 70%, 50%)",
+                  "hsl(330, 70%, 50%)",
+                  "hsl(160, 70%, 40%)",
+                ].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setNewTagColor(c)}
+                    className={`h-8 w-8 rounded-full border-2 transition-all ${
+                      newTagColor === c ? "border-foreground scale-110" : "border-transparent hover:scale-105"
+                    }`}
+                    style={{ backgroundColor: c }}
+                    aria-label={`Select color ${c}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col-reverse gap-2 border-t border-border px-6 py-4 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setAddTagOpen(false)
+                setNewTagName("")
+              }}
+              className="h-10 min-w-[88px] rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                const trimmed = newTagName.trim()
+                if (!trimmed) return
+                const tagKey = trimmed.toUpperCase().replace(/\s+/g, "_")
+                if (tagMappings.some((m) => m.tag === tagKey)) {
+                  toast.error("Tag already exists")
+                  return
+                }
+                const newMapping: TagMapping = {
+                  tag: tagKey,
+                  label: trimmed,
+                  icon: "tag",
+                  color: newTagColor,
+                  categories: [],
+                }
+                setTagMappings([...tagMappings, newMapping])
+                toast.success(`Tag "${trimmed}" added`)
+                setNewTagName("")
+                setNewTagColor("hsl(var(--chart-1))")
+                setAddTagOpen(false)
+              }}
+              disabled={!newTagName.trim()}
+              className="h-10 min-w-[100px] rounded-lg"
+            >
+              Add Tag
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add/Edit Recurring Bill Dialog */}
+      <Dialog open={recurringOpen} onOpenChange={setRecurringOpen}>
+        <DialogContent className="sm:max-w-md gap-0 overflow-hidden rounded-xl border-border p-0 shadow-2xl">
+          <DialogHeader className="px-6 pt-6 pb-4">
+            <DialogTitle className="font-heading text-xl font-semibold tracking-tight">
+              {editingRecurring ? "Edit Recurring Bill" : "Add Recurring Bill"}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              {editingRecurring
+                ? "Update the details for this recurring bill."
+                : "Set up a monthly recurring bill to track automatically."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 px-6 pb-6">
+            <div className="space-y-2">
+              <Label htmlFor="recurring-desc" className="text-sm font-medium text-foreground">
+                Description
+              </Label>
+              <Input
+                id="recurring-desc"
+                placeholder="e.g. Netflix, Rent, Electric Bill"
+                value={recurringForm.description}
+                onChange={(e) => setRecurringForm((f) => ({ ...f, description: e.target.value }))}
+                className="h-11 rounded-lg border-input bg-background text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="recurring-amount" className="text-sm font-medium text-foreground">
+                Amount
+              </Label>
+              <Input
+                id="recurring-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={recurringForm.amount}
+                onChange={(e) => setRecurringForm((f) => ({ ...f, amount: e.target.value }))}
+                className="h-11 rounded-lg border-input bg-background text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Category</Label>
+              <Select
+                aria-label="Category"
+                placeholder="Select category"
+                selectedKeys={recurringForm.category ? [recurringForm.category] : []}
+                onSelectionChange={(keys) => {
+                  const v = Array.from(keys)[0]
+                  if (typeof v === "string") setRecurringForm((f) => ({ ...f, category: v }))
+                }}
+              >
+                {CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} textValue={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Payment Method</Label>
+              <Select
+                aria-label="Payment Method"
+                placeholder="Select payment method"
+                selectedKeys={recurringForm.paymentMethod ? [recurringForm.paymentMethod] : []}
+                onSelectionChange={(keys) => {
+                  const v = Array.from(keys)[0]
+                  if (typeof v === "string") setRecurringForm((f) => ({ ...f, paymentMethod: v }))
+                }}
+              >
+                {paymentMethods.map((pm) => (
+                  <SelectItem key={pm} textValue={pm}>
+                    {pm}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Due Day (1-31)</Label>
+              <Select
+                aria-label="Due Day"
+                placeholder="Select day"
+                selectedKeys={recurringForm.dueDay ? [recurringForm.dueDay] : []}
+                onSelectionChange={(keys) => {
+                  const v = Array.from(keys)[0]
+                  if (typeof v === "string") setRecurringForm((f) => ({ ...f, dueDay: v }))
+                }}
+              >
+                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                  <SelectItem key={String(d)} textValue={String(d)}>
+                    {String(d)}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+          </div>
+          <div className="flex flex-col-reverse gap-2 border-t border-border px-6 py-4 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setRecurringOpen(false)
+                setEditingRecurring(null)
+              }}
+              className="h-10 min-w-[88px] rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                const desc = recurringForm.description.trim()
+                const amt = parseFloat(recurringForm.amount)
+                if (!desc || isNaN(amt) || amt <= 0) {
+                  toast.error("Please fill in all required fields")
+                  return
+                }
+                const dueDay = parseInt(recurringForm.dueDay, 10)
+                if (editingRecurring) {
+                  updateRecurringTx(editingRecurring.id, {
+                    description: desc,
+                    amount: amt,
+                    category: recurringForm.category,
+                    paymentMethod: recurringForm.paymentMethod,
+                    dueDay,
+                  })
+                  toast.success("Recurring bill updated", { description: desc })
+                } else {
+                  addRecurringTx({
+                    description: desc,
+                    amount: amt,
+                    category: recurringForm.category,
+                    paymentMethod: recurringForm.paymentMethod,
+                    dueDay,
+                    frequency: "monthly",
+                    isActive: true,
+                  })
+                  toast.success("Recurring bill added", { description: desc })
+                }
+                setRecurringOpen(false)
+                setEditingRecurring(null)
+              }}
+              disabled={!recurringForm.description.trim() || !recurringForm.amount}
+              className="h-10 min-w-[100px] rounded-lg"
+            >
+              {editingRecurring ? "Save Changes" : "Add Bill"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Supabase Sync Dialog */}
       <Dialog open={supabaseOpen} onOpenChange={setSupabaseOpen}>

@@ -1,4 +1,4 @@
-import type { Currency } from "./types"
+import type { Currency, TagMapping } from "./types"
 
 /** Categories used across the app (add-expense, budgets, etc.). Stored as display label (e.g. "Dine Out" / "Food & Drink"). */
 export const CATEGORIES = [
@@ -107,6 +107,66 @@ export const INCOME_CATEGORY_OPTIONS = INCOME_CATEGORIES.map((label) => ({
   label,
   icon: INCOME_CATEGORY_ICONS[label] ?? "circle-dot",
 }))
+
+/** Default expense super-category tag mappings */
+export const DEFAULT_TAG_MAPPINGS: TagMapping[] = [
+  {
+    tag: "NEEDS",
+    label: "Needs",
+    icon: "shield-check",
+    color: "hsl(var(--chart-1))",
+    categories: ["Groceries", "Food & Drink", "Utilities", "Housing", "Health"],
+  },
+  {
+    tag: "WANTS",
+    label: "Wants",
+    icon: "sparkles",
+    color: "hsl(var(--chart-2))",
+    categories: ["Entertainment", "Shopping"],
+  },
+  {
+    tag: "FAMILY",
+    label: "Family",
+    icon: "heart-handshake",
+    color: "hsl(var(--chart-3))",
+    categories: [],
+  },
+  {
+    tag: "INVESTMENT",
+    label: "Investment",
+    icon: "trending-up",
+    color: "hsl(var(--chart-4))",
+    categories: ["Education"],
+  },
+  {
+    tag: "GIVING",
+    label: "Giving",
+    icon: "hand-heart",
+    color: "hsl(var(--chart-5))",
+    categories: [],
+  },
+  {
+    tag: "GOVERNMENT",
+    label: "Government",
+    icon: "landmark",
+    color: "hsl(var(--primary))",
+    categories: [],
+  },
+  {
+    tag: "HOUSE",
+    label: "House",
+    icon: "home",
+    color: "hsl(200, 70%, 50%)",
+    categories: [],
+  },
+  {
+    tag: "VEHICLE",
+    label: "Vehicle",
+    icon: "car",
+    color: "hsl(30, 70%, 50%)",
+    categories: ["Transport"],
+  },
+]
 
 /** Default category budget splits when creating first budget (% of total). */
 export const DEFAULT_CATEGORY_BUDGETS: { category: string; pct: number; icon: string }[] = [

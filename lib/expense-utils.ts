@@ -1,6 +1,6 @@
 "use client"
 
-import type { Transaction, MonthlyBudget, CreditCardReminder, CreditCardPayment } from "./types"
+import type { Transaction, MonthlyBudget, CreditCardReminder, CreditCardPayment, TagMapping, RecurringTransaction } from "./types"
 import { format, subMonths, startOfMonth, endOfMonth, parseISO } from "date-fns"
 
 /** Get current year/month */
@@ -339,4 +339,149 @@ export function getOrdinalSuffix(n: number): string {
   const s = ["th", "st", "nd", "rd"]
   const v = n % 100
   return n + (s[(v - 20) % 10] || s[v] || s[0])
+}
+
+// --- Tag-based utilities ---
+
+/** Resolve tag for a transaction from tag mappings (category → tag lookup) */
+export function resolveTag(category: string, tagMappings: TagMapping[]): string | undefined {
+  for (const mapping of tagMappings) {
+    if (mapping.categories.includes(category)) return mapping.tag
+  }
+  return undefined
+}
+
+/** Group expenses by tag for a time period */
+export function getSpendingByTag(
+  transactions: Transaction[],
+  tagMappings: TagMapping[],
+  year?: number,
+  month?: number
+): { tag: string; label: string; amount: number; color: string }[] {
+  const filtered = year && month
+    ? filterTransactionsByMonth(transactions, year, month).filter((t) => t.amount < 0)
+    : transactions.filter((t) => t.amount < 0)
+
+  const byTag: Record<string, number> = {}
+  filtered.forEach((t) => {
+    const tag = t.tag || resolveTag(t.category, tagMappings) || "OTHER"
+    byTag[tag] = (byTag[tag] ?? 0) + Math.abs(t.amount)
+  })
+
+  return Object.entries(byTag)
+    .map(([tag, amount]) => {
+      const mapping = tagMappings.find((m) => m.tag === tag)
+      return {
+        tag,
+        label: mapping?.label ?? tag,
+        amount,
+        color: mapping?.color ?? "hsl(var(--muted-foreground))",
+      }
+    })
+    .sort((a, b) => b.amount - a.amount)
+}
+
+/** Get yearly spending by tag (for Expenses Summary) */
+export function getYearlySpendingByTag(
+  transactions: Transaction[],
+  tagMappings: TagMapping[],
+  year: number
+): { tag: string; label: string; amount: number; color: string; icon: string }[] {
+  const yearTx = transactions.filter((t) => {
+    const y = parseInt(t.date.split("-")[0])
+    return y === year && t.amount < 0
+  })
+
+  const byTag: Record<string, number> = {}
+  yearTx.forEach((t) => {
+    const tag = t.tag || resolveTag(t.category, tagMappings) || "OTHER"
+    byTag[tag] = (byTag[tag] ?? 0) + Math.abs(t.amount)
+  })
+
+  return Object.entries(byTag)
+    .map(([tag, amount]) => {
+      const mapping = tagMappings.find((m) => m.tag === tag)
+      return {
+        tag,
+        label: mapping?.label ?? tag,
+        amount,
+        color: mapping?.color ?? "hsl(var(--muted-foreground))",
+        icon: mapping?.icon ?? "circle-dot",
+      }
+    })
+    .sort((a, b) => b.amount - a.amount)
+}
+
+/** Monthly savings = income - expenses for a given month */
+export function getMonthlySavings(transactions: Transaction[], year: number, month: number): number {
+  const monthTx = filterTransactionsByMonth(transactions, year, month)
+  return sumIncome(monthTx) - sumExpenses(monthTx)
+}
+
+/** Savings rate as percentage */
+export function getSavingsRate(income: number, expenses: number): number {
+  if (income <= 0) return 0
+  return Math.round(((income - expenses) / income) * 100)
+}
+
+/** Chart data with savings trend for last N months */
+export function getChartDataWithSavings(
+  transactions: Transaction[],
+  monthCount: number = 7
+): { month: string; income: number; expenses: number; savings: number }[] {
+  const now = new Date()
+  const result = []
+  for (let i = monthCount - 1; i >= 0; i--) {
+    const d = subMonths(new Date(now.getFullYear(), now.getMonth(), 1), i)
+    const y = d.getFullYear()
+    const m = d.getMonth() + 1
+    const list = filterTransactionsByMonth(transactions, y, m)
+    const income = sumIncome(list)
+    const expenses = sumExpenses(list)
+    result.push({
+      month: format(d, "MMM"),
+      income,
+      expenses,
+      savings: income - expenses,
+    })
+  }
+  return result
+}
+
+/** Check which recurring bills are pending (not yet logged) for the current month */
+export function getPendingBills(
+  recurringTransactions: RecurringTransaction[],
+  transactions: Transaction[],
+  year: number,
+  month: number
+): { recurring: RecurringTransaction; isPaid: boolean }[] {
+  const monthTx = filterTransactionsByMonth(transactions, year, month)
+
+  return recurringTransactions
+    .filter((r) => r.isActive)
+    .map((recurring) => {
+      // Check if a matching transaction exists this month
+      const isPaid = monthTx.some(
+        (t) =>
+          t.amount < 0 &&
+          Math.abs(Math.abs(t.amount) - recurring.amount) < 1 &&
+          t.description.toLowerCase().includes(recurring.description.toLowerCase().slice(0, 10))
+      )
+      return { recurring, isPaid }
+    })
+    .sort((a, b) => {
+      // Unpaid first, then by due day
+      if (a.isPaid !== b.isPaid) return a.isPaid ? 1 : -1
+      return a.recurring.dueDay - b.recurring.dueDay
+    })
+}
+
+/** Get account balance by summing initial balance + all account transactions */
+export function getAccountBalance(
+  accountId: string,
+  initialBalance: number,
+  transactions: Transaction[]
+): number {
+  const accountTx = transactions.filter((t) => t.accountId === accountId)
+  return initialBalance + accountTx.reduce((sum, t) => sum + t.amount, 0)
 }

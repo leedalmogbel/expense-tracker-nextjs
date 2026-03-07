@@ -13,6 +13,8 @@ export interface Transaction {
   isPositive?: boolean
   paymentMethod: string
   scope?: "personal" | "household" // default "personal"
+  tag?: string // super-category tag (e.g. "NEEDS", "WANTS")
+  accountId?: string // optional bank account reference
   createdAt: string // ISO
   updatedAt: string // ISO
 }
@@ -28,6 +30,8 @@ export interface MonthlyBudget {
   month: number // 1–12
   budget: number // total for month
   categoryBudgets: CategoryBudget[]
+  savingsTarget?: number // desired monthly savings
+  estimatedCategoryBudgets?: CategoryBudget[] // estimated costs per category
 }
 
 export interface Currency {
@@ -111,6 +115,99 @@ export interface CreditCardPayment {
   updatedAt: string
 }
 
+/** Super-category tag mapping */
+export interface TagMapping {
+  tag: string
+  label: string
+  icon: string
+  color: string
+  categories: string[] // category names assigned to this tag
+}
+
+/** Recurring bill/transaction template */
+export interface RecurringTransaction {
+  id: string
+  description: string
+  amount: number
+  category: string
+  tag?: string
+  paymentMethod: string
+  dueDay: number // 1-31
+  frequency: "monthly"
+  accountId?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+/** Bank / e-wallet / cash account */
+export interface BankAccount {
+  id: string
+  name: string
+  type: "bank" | "ewallet" | "cash"
+  initialBalance: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+/** Expected income source */
+export interface IncomeSource {
+  id: string
+  name: string
+  expectedAmount: number
+  payDay: number | "EOM" // 1-31 or end-of-month
+  category: string
+  accountId?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+/** Loan / amortization */
+export interface Loan {
+  id: string
+  name: string
+  totalAmount: number
+  monthlyPayment: number
+  totalMonths: number
+  startDate: string // YYYY-MM-DD
+  dueDay: number // 1-31
+  payments: LoanPayment[]
+  note?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface LoanPayment {
+  id: string
+  monthNumber: number
+  amount: number
+  paidDate: string
+  note?: string
+}
+
+/** Project expense group */
+export interface Project {
+  id: string
+  name: string
+  budget?: number
+  items: ProjectItem[]
+  status: "active" | "completed"
+  createdAt: string
+  updatedAt: string
+  completedAt?: string
+}
+
+export interface ProjectItem {
+  id: string
+  name: string
+  cost: number
+  date: string
+  note?: string
+}
+
 /** Storage keys (same concept as AsyncStorage on mobile) */
 export const STORAGE_KEYS = {
   TRANSACTIONS: "@expense_tracker:transactions",
@@ -123,4 +220,10 @@ export const STORAGE_KEYS = {
   SHOPPING_TRIPS: "@expense_tracker:shopping_trips",
   CREDIT_CARD_PAYMENTS: "@expense_tracker:credit_card_payments",
   CREDIT_CARD_INSTALLMENTS: "@expense_tracker:credit_card_installments",
+  TAG_MAPPINGS: "@expense_tracker:tag_mappings",
+  RECURRING_TRANSACTIONS: "@expense_tracker:recurring_transactions",
+  BANK_ACCOUNTS: "@expense_tracker:bank_accounts",
+  INCOME_SOURCES: "@expense_tracker:income_sources",
+  LOANS: "@expense_tracker:loans",
+  PROJECTS: "@expense_tracker:projects",
 } as const

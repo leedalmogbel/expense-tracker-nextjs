@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { IncomeSourcesSection } from "@/components/dashboard/income-sources-section"
 import { IncomeSummaryCards } from "@/components/dashboard/income-summary-cards"
 import { IncomeTrendChart } from "@/components/dashboard/income-trend-chart"
 import { IncomeBreakdown } from "@/components/dashboard/income-breakdown"
@@ -19,6 +20,9 @@ export default function IncomePage() {
         initial="hidden"
         animate="visible"
       >
+        <motion.div variants={fadeUpItem}>
+          <IncomeSourcesSection />
+        </motion.div>
         <motion.div variants={fadeUpItem}>
           <IncomeSummaryCards />
         </motion.div>

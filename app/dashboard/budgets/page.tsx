@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { BudgetExpenseCards } from "@/components/dashboard/budget-expense-cards"
 import { BudgetProgress } from "@/components/dashboard/budget-progress"
+import { SavingsProgress } from "@/components/dashboard/savings-progress"
 import { useDashboardActions } from "@/contexts/dashboard-actions-context"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 
@@ -23,6 +24,9 @@ export default function BudgetsPage() {
       >
         <motion.div variants={fadeUpItem}>
           <BudgetExpenseCards />
+        </motion.div>
+        <motion.div variants={fadeUpItem}>
+          <SavingsProgress />
         </motion.div>
         <motion.div variants={fadeUpItem}>
           <BudgetProgress onManage={() => openAddBudgetRef.current?.()} />

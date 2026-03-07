@@ -1,6 +1,6 @@
 "use client"
 
-import type { Transaction, MonthlyBudget, Currency, CreditCardReminder, CreditCardPayment, CreditCardInstallment, ShoppingTrip } from "./types"
+import type { Transaction, MonthlyBudget, Currency, CreditCardReminder, CreditCardPayment, CreditCardInstallment, ShoppingTrip, TagMapping, RecurringTransaction, BankAccount, IncomeSource, Loan, Project } from "./types"
 import { STORAGE_KEYS } from "./types"
 import { DEFAULT_CURRENCY } from "./constants"
 
@@ -247,6 +247,177 @@ export function deleteShoppingTrip(id: string): void {
 
 export function getActiveShoppingTrip(): ShoppingTrip | null {
   return getShoppingTrips().find((t) => t.status === "active") ?? null
+}
+
+// --- Tag Mappings ---
+
+export function getTagMappings(): TagMapping[] {
+  return getItem<TagMapping[]>(STORAGE_KEYS.TAG_MAPPINGS) ?? []
+}
+
+export function saveTagMappings(mappings: TagMapping[]): void {
+  setItem(STORAGE_KEYS.TAG_MAPPINGS, mappings)
+}
+
+// --- Recurring Transactions ---
+
+export function getRecurringTransactions(): RecurringTransaction[] {
+  return getItem<RecurringTransaction[]>(STORAGE_KEYS.RECURRING_TRANSACTIONS) ?? []
+}
+
+export function saveRecurringTransactions(items: RecurringTransaction[]): void {
+  setItem(STORAGE_KEYS.RECURRING_TRANSACTIONS, items)
+}
+
+export function addRecurringTransaction(
+  item: Omit<RecurringTransaction, "id" | "createdAt" | "updatedAt">
+): RecurringTransaction {
+  const items = getRecurringTransactions()
+  const now = new Date().toISOString()
+  const id = `rec-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newItem: RecurringTransaction = { ...item, id, createdAt: now, updatedAt: now }
+  saveRecurringTransactions([newItem, ...items])
+  return newItem
+}
+
+export function updateRecurringTransaction(id: string, updates: Partial<RecurringTransaction>): void {
+  const items = getRecurringTransactions()
+  const index = items.findIndex((i) => i.id === id)
+  if (index === -1) return
+  items[index] = { ...items[index], ...updates, updatedAt: new Date().toISOString() }
+  saveRecurringTransactions(items)
+}
+
+export function deleteRecurringTransaction(id: string): void {
+  saveRecurringTransactions(getRecurringTransactions().filter((i) => i.id !== id))
+}
+
+// --- Bank Accounts ---
+
+export function getBankAccounts(): BankAccount[] {
+  return getItem<BankAccount[]>(STORAGE_KEYS.BANK_ACCOUNTS) ?? []
+}
+
+export function saveBankAccounts(accounts: BankAccount[]): void {
+  setItem(STORAGE_KEYS.BANK_ACCOUNTS, accounts)
+}
+
+export function addBankAccount(
+  account: Omit<BankAccount, "id" | "createdAt" | "updatedAt">
+): BankAccount {
+  const accounts = getBankAccounts()
+  const now = new Date().toISOString()
+  const id = `acct-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newAcct: BankAccount = { ...account, id, createdAt: now, updatedAt: now }
+  saveBankAccounts([newAcct, ...accounts])
+  return newAcct
+}
+
+export function updateBankAccount(id: string, updates: Partial<BankAccount>): void {
+  const accounts = getBankAccounts()
+  const index = accounts.findIndex((a) => a.id === id)
+  if (index === -1) return
+  accounts[index] = { ...accounts[index], ...updates, updatedAt: new Date().toISOString() }
+  saveBankAccounts(accounts)
+}
+
+export function deleteBankAccount(id: string): void {
+  saveBankAccounts(getBankAccounts().filter((a) => a.id !== id))
+}
+
+// --- Income Sources ---
+
+export function getIncomeSources(): IncomeSource[] {
+  return getItem<IncomeSource[]>(STORAGE_KEYS.INCOME_SOURCES) ?? []
+}
+
+export function saveIncomeSources(sources: IncomeSource[]): void {
+  setItem(STORAGE_KEYS.INCOME_SOURCES, sources)
+}
+
+export function addIncomeSource(
+  source: Omit<IncomeSource, "id" | "createdAt" | "updatedAt">
+): IncomeSource {
+  const sources = getIncomeSources()
+  const now = new Date().toISOString()
+  const id = `isrc-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newSrc: IncomeSource = { ...source, id, createdAt: now, updatedAt: now }
+  saveIncomeSources([newSrc, ...sources])
+  return newSrc
+}
+
+export function updateIncomeSource(id: string, updates: Partial<IncomeSource>): void {
+  const sources = getIncomeSources()
+  const index = sources.findIndex((s) => s.id === id)
+  if (index === -1) return
+  sources[index] = { ...sources[index], ...updates, updatedAt: new Date().toISOString() }
+  saveIncomeSources(sources)
+}
+
+export function deleteIncomeSource(id: string): void {
+  saveIncomeSources(getIncomeSources().filter((s) => s.id !== id))
+}
+
+// --- Loans ---
+
+export function getLoans(): Loan[] {
+  return getItem<Loan[]>(STORAGE_KEYS.LOANS) ?? []
+}
+
+export function saveLoans(loans: Loan[]): void {
+  setItem(STORAGE_KEYS.LOANS, loans)
+}
+
+export function addLoan(loan: Omit<Loan, "id" | "createdAt" | "updatedAt">): Loan {
+  const loans = getLoans()
+  const now = new Date().toISOString()
+  const id = `loan-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newLoan: Loan = { ...loan, id, createdAt: now, updatedAt: now }
+  saveLoans([newLoan, ...loans])
+  return newLoan
+}
+
+export function updateLoan(id: string, updates: Partial<Loan>): void {
+  const loans = getLoans()
+  const index = loans.findIndex((l) => l.id === id)
+  if (index === -1) return
+  loans[index] = { ...loans[index], ...updates, updatedAt: new Date().toISOString() }
+  saveLoans(loans)
+}
+
+export function deleteLoan(id: string): void {
+  saveLoans(getLoans().filter((l) => l.id !== id))
+}
+
+// --- Projects ---
+
+export function getProjects(): Project[] {
+  return getItem<Project[]>(STORAGE_KEYS.PROJECTS) ?? []
+}
+
+export function saveProjects(projects: Project[]): void {
+  setItem(STORAGE_KEYS.PROJECTS, projects)
+}
+
+export function addProject(project: Omit<Project, "id" | "createdAt" | "updatedAt">): Project {
+  const projects = getProjects()
+  const now = new Date().toISOString()
+  const id = `proj-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const newProj: Project = { ...project, id, createdAt: now, updatedAt: now }
+  saveProjects([newProj, ...projects])
+  return newProj
+}
+
+export function updateProject(id: string, updates: Partial<Project>): void {
+  const projects = getProjects()
+  const index = projects.findIndex((p) => p.id === id)
+  if (index === -1) return
+  projects[index] = { ...projects[index], ...updates, updatedAt: new Date().toISOString() }
+  saveProjects(projects)
+}
+
+export function deleteProject(id: string): void {
+  saveProjects(getProjects().filter((p) => p.id !== id))
 }
 
 // --- Clear all ---

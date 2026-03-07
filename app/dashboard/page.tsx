@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { BudgetExpenseCards } from "@/components/dashboard/budget-expense-cards"
 import { StatCards } from "@/components/dashboard/stat-cards"
 import { ActivityFeed } from "@/components/dashboard/activity-feed"
+import { PendingBills } from "@/components/dashboard/pending-bills"
 import { Receipt, PieChart, Target, Wallet, ShoppingBasket } from "lucide-react"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 import { CreditCardDueBanner } from "@/components/dashboard/credit-card-due-banner"
@@ -40,6 +41,9 @@ export default function DashboardPage() {
         </motion.div>
         <motion.div variants={fadeUpItem} className="hidden lg:block">
           <StatCards />
+        </motion.div>
+        <motion.div variants={fadeUpItem}>
+          <PendingBills />
         </motion.div>
         <motion.div variants={fadeUpItem}>
           <ActivityFeed />
