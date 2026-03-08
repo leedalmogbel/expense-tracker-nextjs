@@ -226,4 +226,5 @@ export const STORAGE_KEYS = {
   INCOME_SOURCES: "@expense_tracker:income_sources",
   LOANS: "@expense_tracker:loans",
   PROJECTS: "@expense_tracker:projects",
+  ONBOARDING_DISMISSED: "@expense_tracker:onboarding_dismissed",
 } as const

@@ -48,8 +48,10 @@ import {
   ChevronDown,
   ChevronUp,
   CalendarDays,
+  BookOpen,
 } from "lucide-react"
 import { HouseholdSettings } from "@/components/dashboard/household-settings"
+import { setOnboardingDismissed } from "@/lib/storage"
 
 function GoogleIcon() {
   return (
@@ -643,6 +645,51 @@ export default function SettingsPage() {
               </Card>
             </motion.div>
           )}
+
+          {/* Preferences */}
+          <motion.div variants={fadeUpItem}>
+            <Card className="border-border">
+              <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Settings className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                      Preferences
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      App behavior and display settings
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 py-5 sm:px-6 sm:py-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+                      <BookOpen className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">Onboarding Guide</p>
+                      <p className="text-xs text-muted-foreground">Show the welcome walkthrough again</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg shrink-0"
+                    onClick={() => {
+                      setOnboardingDismissed(false)
+                      toast.success("Onboarding will show on your next visit")
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Coming Soon */}
           <motion.div variants={fadeUpItem}>

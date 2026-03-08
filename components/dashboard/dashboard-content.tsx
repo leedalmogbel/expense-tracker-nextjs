@@ -12,8 +12,9 @@ import { PendingInviteBanner } from "@/components/dashboard/pending-invite-banne
 import { FloatingAddButton } from "@/components/dashboard/floating-add-button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { getCreditCardReminders } from "@/lib/storage"
+import { getCreditCardReminders, isOnboardingDismissed } from "@/lib/storage"
 import { getDueReminders } from "@/lib/expense-utils"
+import { OnboardingWizard } from "@/components/dashboard/onboarding-wizard"
 
 /**
  * App shell content area: flex layout with spacer (no margin) so content is flush with sidebar.
@@ -25,6 +26,13 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
   const [addExpenseOpen, setAddExpenseOpen] = useState(false)
   const [addBudgetOpen, setAddBudgetOpen] = useState(false)
   const [addIncomeOpen, setAddIncomeOpen] = useState(false)
+  const [onboardingOpen, setOnboardingOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isOnboardingDismissed()) {
+      setOnboardingOpen(true)
+    }
+  }, [])
 
   useEffect(() => {
     const reminders = getCreditCardReminders()
@@ -80,6 +88,7 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
       <AddExpenseModal open={addExpenseOpen} onOpenChange={setAddExpenseOpen} />
       <AddBudgetModal open={addBudgetOpen} onOpenChange={setAddBudgetOpen} />
       <AddIncomeModal open={addIncomeOpen} onOpenChange={setAddIncomeOpen} />
+      <OnboardingWizard open={onboardingOpen} onOpenChange={setOnboardingOpen} />
     </div>
   )
 }

@@ -420,6 +420,16 @@ export function deleteProject(id: string): void {
   saveProjects(getProjects().filter((p) => p.id !== id))
 }
 
+// --- Onboarding ---
+
+export function isOnboardingDismissed(): boolean {
+  return getItem<boolean>(STORAGE_KEYS.ONBOARDING_DISMISSED) ?? false
+}
+
+export function setOnboardingDismissed(value: boolean): void {
+  setItem(STORAGE_KEYS.ONBOARDING_DISMISSED, value)
+}
+
 // --- Clear all ---
 
 export function clearAllData(): void {
