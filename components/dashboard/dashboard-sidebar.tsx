@@ -22,6 +22,8 @@ import {
   EllipsisVertical,
   Activity,
   Grid3X3,
+  Landmark,
+  WifiOff,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useRef, useEffect, useCallback } from "react"
@@ -45,8 +47,9 @@ const navItems = [
   { href: "/dashboard/budgets", icon: Target, label: "Budgets" },
   { href: "/dashboard/categories", icon: Grid3X3, label: "Categories" },
   { href: "/dashboard/income", icon: BanknoteArrowUp, label: "Income" },
-  { href: "/dashboard/cards", icon: CreditCard, label: "Cards" },
-  { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips" },
+  { href: "/dashboard/cards", icon: CreditCard, label: "Cards & Loans" },
+  { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips & Projects" },
+  { href: "/dashboard/accounts", icon: Landmark, label: "Accounts" },
   { href: "/dashboard/members", icon: Users, label: "Members" },
   { href: "/dashboard/activity", icon: Activity, label: "Activity" },
 ]
@@ -204,11 +207,28 @@ function MobileTabBar({ pathname }: { pathname: string }) {
   )
 }
 
+function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(true)
+  useEffect(() => {
+    setIsOnline(navigator.onLine)
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [])
+  return isOnline
+}
+
 export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut } = useAuth()
   const { collapsed, setCollapsed } = useSidebar()
+  const isOnline = useOnlineStatus()
   const displayName = getUserDisplayName(user?.email, user?.user_metadata)
   const initials = getInitials(displayName, user?.email)
   const userEmail = user?.email ?? null
@@ -349,7 +369,18 @@ export function DashboardSidebar() {
   )
 
   const desktopFooter = (
-    <div className="px-3 py-3">
+    <div className="px-3 py-3 space-y-2">
+      {!isOnline && (
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-500",
+            collapsed && "justify-center px-2"
+          )}
+        >
+          <WifiOff className="h-3.5 w-3.5 shrink-0" />
+          {!collapsed && <span>Offline Mode</span>}
+        </div>
+      )}
       <Dropdown placement="top-start" className="w-full">
         <DropdownTrigger>{userTrigger}</DropdownTrigger>
         <DropdownMenu aria-label="User menu" className="min-w-[12rem] bg-content1 rounded-xl shadow-lg p-2">

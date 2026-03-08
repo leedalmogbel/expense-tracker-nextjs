@@ -13,6 +13,8 @@ export const MobileFinanceSummary = memo(function MobileFinanceSummary() {
     totalBalance,
     monthlyIncome,
     monthlyExpenses,
+    monthlySavings,
+    savingsRate,
     prevMonthIncome,
     prevMonthExpenses,
     currentBudget,
@@ -155,7 +157,15 @@ export const MobileFinanceSummary = memo(function MobileFinanceSummary() {
           </div>
           <div className="flex-1 rounded-2xl border border-border bg-card p-4 shadow-sm shadow-black/[0.02] dark:shadow-lg dark:shadow-black/15">
             <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Savings</p>
-            <p className="mt-1 text-lg font-bold font-heading text-foreground tabular-nums">{fmtCompact(totalBalance)}</p>
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <p className="text-lg font-bold font-heading text-foreground tabular-nums">{fmtCompact(monthlySavings)}</p>
+              <span className={cn(
+                "text-[10px] font-medium tabular-nums",
+                savingsRate > 0 ? "text-primary" : savingsRate < 0 ? "text-destructive" : "text-muted-foreground"
+              )}>
+                ({Math.round(savingsRate)}%)
+              </span>
+            </div>
           </div>
         </div>
       </div>

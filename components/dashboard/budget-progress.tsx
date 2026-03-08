@@ -9,7 +9,10 @@ interface BudgetProgressProps {
 }
 
 export function BudgetProgress({ onManage }: BudgetProgressProps) {
-  const { currency, budgetProgress } = useExpense()
+  const { currency, budgetProgress, currentBudget } = useExpense()
+  const estimatedMap = Object.fromEntries(
+    (currentBudget?.estimatedCategoryBudgets ?? []).map((cb) => [cb.category, cb.budget])
+  )
 
   if (budgetProgress.length === 0) {
     return (
@@ -66,18 +69,26 @@ export function BudgetProgress({ onManage }: BudgetProgressProps) {
           {budgetProgress.map((row) => {
             const percentage = Math.min((row.spent / row.budget) * 100, 100)
             const isOver = row.spent > row.budget
+            const estimated = estimatedMap[row.category]
 
             return (
               <div key={row.category} className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-foreground">{row.category}</span>
-                  <span
-                    className={`text-xs font-medium ${isOver ? "text-destructive" : "text-muted-foreground"}`}
-                  >
-                    {currency.symbol}
-                    {row.spent.toLocaleString()} / {currency.symbol}
-                    {row.budget.toLocaleString()}
-                  </span>
+                  <div className="text-right">
+                    <span
+                      className={`text-xs font-medium ${isOver ? "text-destructive" : "text-muted-foreground"}`}
+                    >
+                      {currency.symbol}
+                      {row.spent.toLocaleString()} / {currency.symbol}
+                      {row.budget.toLocaleString()}
+                    </span>
+                    {estimated != null && (
+                      <span className="text-[10px] text-muted-foreground block">
+                        Est: {currency.symbol}{estimated.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div

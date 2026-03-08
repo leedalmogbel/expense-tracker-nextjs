@@ -13,14 +13,14 @@ export const StatCards = memo(function StatCards() {
     totalBalance,
     monthlyIncome,
     monthlyExpenses,
+    monthlySavings,
+    savingsRate,
     prevMonthIncome,
     prevMonthExpenses,
     transactions,
     year,
     month,
   } = useExpense()
-
-  const savings = totalBalance
 
   const prevTotalBalance = useMemo(() => {
     return transactions
@@ -31,9 +31,28 @@ export const StatCards = memo(function StatCards() {
       .reduce((s, t) => s + t.amount, 0)
   }, [transactions, year, month])
 
+  const prevMonthlySavings = useMemo(() => {
+    const prevMonth = month === 1 ? 12 : month - 1
+    const prevYear = month === 1 ? year - 1 : year
+    const prevIncome = transactions
+      .filter((t) => {
+        const [y, m] = t.date.split("-").map(Number)
+        return y === prevYear && m === prevMonth && t.amount > 0
+      })
+      .reduce((s, t) => s + t.amount, 0)
+    const prevExpenses = transactions
+      .filter((t) => {
+        const [y, m] = t.date.split("-").map(Number)
+        return y === prevYear && m === prevMonth && t.amount < 0
+      })
+      .reduce((s, t) => s + Math.abs(t.amount), 0)
+    return prevIncome - prevExpenses
+  }, [transactions, year, month])
+
   const balanceChange = getMonthOverMonthChange(totalBalance, prevTotalBalance)
   const incomeChange = getMonthOverMonthChange(monthlyIncome, prevMonthIncome)
   const expenseChange = getMonthOverMonthChange(monthlyExpenses, prevMonthExpenses)
+  const savingsChange = getMonthOverMonthChange(monthlySavings, prevMonthlySavings)
   // For expenses, rising is bad (down trend), falling is good (up trend)
   const expenseTrend: "up" | "down" | "neutral" =
     expenseChange.trend === "up" ? "down" : expenseChange.trend === "down" ? "up" : "neutral"
@@ -44,6 +63,7 @@ export const StatCards = memo(function StatCards() {
       value: `${currency.symbol}${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: balanceChange.text,
       trend: balanceChange.trend,
+      description: "",
       icon: DollarSign,
       iconBg: "bg-primary/10 text-primary",
     },
@@ -52,6 +72,7 @@ export const StatCards = memo(function StatCards() {
       value: `${currency.symbol}${monthlyIncome.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: incomeChange.text,
       trend: incomeChange.trend,
+      description: "",
       icon: TrendingUp,
       iconBg: "bg-chart-2/10 text-[hsl(var(--chart-2))]",
     },
@@ -60,14 +81,16 @@ export const StatCards = memo(function StatCards() {
       value: `${currency.symbol}${monthlyExpenses.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: expenseChange.text,
       trend: expenseTrend,
+      description: "",
       icon: CreditCard,
       iconBg: "bg-chart-4/10 text-[hsl(var(--chart-4))]",
     },
     {
-      label: "Total Savings",
-      value: `${currency.symbol}${savings.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      change: balanceChange.text,
-      trend: balanceChange.trend,
+      label: "Monthly Savings",
+      value: `${currency.symbol}${monthlySavings.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      change: savingsChange.text,
+      trend: savingsChange.trend,
+      description: `${Math.round(savingsRate)}% savings rate`,
       icon: PiggyBank,
       iconBg: "bg-chart-3/10 text-[hsl(var(--chart-3))]",
     },
@@ -116,6 +139,9 @@ export const StatCards = memo(function StatCards() {
               </span>
               <span className="text-xs text-muted-foreground">vs last month</span>
             </div>
+            {stat.description && (
+              <p className="mt-1 text-xs text-muted-foreground">{stat.description}</p>
+            )}
           </CardContent>
         </Card>
       ))}

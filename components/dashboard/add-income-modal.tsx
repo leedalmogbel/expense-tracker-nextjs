@@ -16,6 +16,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { useExpense } from "@/contexts/expense-context"
 import { useAuth } from "@/contexts/auth-context"
 import { syncSingleTransaction } from "@/lib/supabase-api"
+import { getBankAccounts } from "@/lib/storage"
 import { getMonthName } from "@/lib/expense-utils"
 import { INCOME_CATEGORIES, INCOME_CATEGORY_ICONS } from "@/lib/constants"
 import { toast } from "sonner"
@@ -48,6 +49,8 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
   const [category, setCategory] = useState("Salary")
   const [paymentMethod, setPaymentMethod] = useState("Bank Transfer")
   const [scope, setScope] = useState<"personal" | "household">("personal")
+  const [accountId, setAccountId] = useState<string>("")
+  const bankAccounts = getBankAccounts().filter((a) => a.isActive)
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -70,6 +73,7 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
       isPositive: true,
       paymentMethod,
       scope,
+      ...(accountId ? { accountId } : {}),
     })
     toast.success("Income added", { description: `${currency.symbol}${amountNum.toFixed(2)} for ${getMonthName(month)} ${year}` })
     if (user && isSupabaseConfigured) {
@@ -82,6 +86,7 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
     setCategory("Salary")
     setPaymentMethod("Bank Transfer")
     setScope("personal")
+    setAccountId("")
   }
 
   return (
@@ -245,6 +250,27 @@ export function AddIncomeModal({ open, onOpenChange }: AddIncomeModalProps) {
                 </Select>
               </div>
             </div>
+
+            {bankAccounts.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">
+                  Account <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Select
+                  placeholder="Select account"
+                  classNames={{ trigger: inputClass }}
+                  selectedKeys={accountId ? [accountId] : []}
+                  onSelectionChange={(keys) => {
+                    const v = Array.from(keys)[0]
+                    setAccountId(typeof v === "string" ? v : "")
+                  }}
+                >
+                  {bankAccounts.map((a) => (
+                    <SelectItem key={a.id}>{a.name}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="gap-2 pt-6 mt-6 border-t border-border px-6 pb-6">

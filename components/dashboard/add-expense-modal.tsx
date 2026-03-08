@@ -19,6 +19,7 @@ import { PaymentMethodPicker } from "@/components/ui/payment-method-picker"
 import { useExpense } from "@/contexts/expense-context"
 import { useAuth } from "@/contexts/auth-context"
 import { syncSingleTransaction } from "@/lib/supabase-api"
+import { getBankAccounts } from "@/lib/storage"
 import { CATEGORIES, CATEGORY_ICONS, getCategoryLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import { User, Users } from "lucide-react"
@@ -39,6 +40,8 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
   const [paymentMethod, setPaymentMethod] = useState<string>("Other")
   const [dateValue, setDateValue] = useState("")
   const [scope, setScope] = useState<"personal" | "household">("personal")
+  const [accountId, setAccountId] = useState<string>("")
+  const bankAccounts = getBankAccounts().filter((a) => a.isActive)
 
   useEffect(() => {
     setDateValue(format(new Date(), "yyyy-MM-dd"))
@@ -70,6 +73,7 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
       isPositive: false,
       paymentMethod: paymentMethod || "Other",
       scope,
+      ...(accountId ? { accountId } : {}),
     })
     toast.success("Expense added", { description: `${description} for ${currency.symbol}${amountNum.toFixed(2)}` })
     if (user && isSupabaseConfigured) {
@@ -80,6 +84,7 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
     setCategory("")
     setPaymentMethod("Other")
     setScope("personal")
+    setAccountId("")
     form.reset()
   }
 
@@ -207,6 +212,27 @@ export function AddExpenseModal({ open, onOpenChange }: AddExpenseModalProps) {
                 <PaymentMethodPicker value={paymentMethod} onChange={setPaymentMethod} />
               </div>
             </div>
+
+            {bankAccounts.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">
+                  Account <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Select
+                  placeholder="Select account"
+                  classNames={{ trigger: inputClass }}
+                  selectedKeys={accountId ? [accountId] : []}
+                  onSelectionChange={(keys) => {
+                    const v = Array.from(keys)[0]
+                    setAccountId(typeof v === "string" ? v : "")
+                  }}
+                >
+                  {bankAccounts.map((a) => (
+                    <SelectItem key={a.id}>{a.name}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="expense-notes" className="text-sm font-medium text-foreground">

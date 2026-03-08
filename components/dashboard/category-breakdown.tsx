@@ -1,27 +1,80 @@
 "use client"
 
-import { memo } from "react"
+import { memo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChart as PieChartIcon } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { useExpense } from "@/contexts/expense-context"
 import { cn } from "@/lib/utils"
 
-export const CategoryBreakdown = memo(function CategoryBreakdown() {
-  const { categoryBreakdown, currency } = useExpense()
-  const total = categoryBreakdown.reduce((sum, item) => sum + item.value, 0)
+type ViewMode = "category" | "tag"
 
-  if (categoryBreakdown.length === 0) {
+export const CategoryBreakdown = memo(function CategoryBreakdown() {
+  const { categoryBreakdown, tagBreakdown, currency } = useExpense()
+  const [viewMode, setViewMode] = useState<ViewMode>("category")
+
+  // Build chart data based on view mode
+  const chartData =
+    viewMode === "category"
+      ? categoryBreakdown.map((item) => ({
+          name: item.name,
+          value: item.value,
+          color: item.color,
+        }))
+      : tagBreakdown.map((item) => ({
+          name: item.label,
+          value: item.amount,
+          color: item.color,
+        }))
+
+  const total = chartData.reduce((sum, item) => sum + item.value, 0)
+  const itemCount = chartData.length
+  const itemLabel =
+    viewMode === "category"
+      ? `${itemCount} categor${itemCount === 1 ? "y" : "ies"}`
+      : `${itemCount} tag${itemCount === 1 ? "" : "s"}`
+
+  const toggleTabs = (
+    <div className="inline-flex items-center rounded-full border border-border bg-muted/30 p-0.5 gap-0.5">
+      <button
+        onClick={() => setViewMode("category")}
+        className={cn(
+          "rounded-full px-3 py-1 text-xs font-medium transition-all duration-200",
+          viewMode === "category"
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        )}
+      >
+        By Category
+      </button>
+      <button
+        onClick={() => setViewMode("tag")}
+        className={cn(
+          "rounded-full px-3 py-1 text-xs font-medium transition-all duration-200",
+          viewMode === "tag"
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        )}
+      >
+        By Tag
+      </button>
+    </div>
+  )
+
+  if (chartData.length === 0) {
     return (
       <Card className="w-full border-border text-card-foreground">
         <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
-          <div className="flex items-center gap-3 w-full">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
-              <PieChartIcon className="h-5 w-5" />
+          <div className="flex items-center justify-between gap-3 w-full">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+                <PieChartIcon className="h-5 w-5" />
+              </div>
+              <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                Spending Breakdown
+              </CardTitle>
             </div>
-            <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
-              Spending by Category
-            </CardTitle>
+            {toggleTabs}
           </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
@@ -30,7 +83,9 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
               <PieChartIcon className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">No data yet</p>
-            <p className="text-xs text-muted-foreground mt-1">Add expenses to see spending by category</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Add expenses to see spending {viewMode === "category" ? "by category" : "by tag"}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -40,18 +95,19 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
   return (
     <Card className="w-full border-border">
       <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
-            <PieChartIcon className="h-5 w-5" />
+        <div className="flex items-center justify-between gap-3 w-full">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+              <PieChartIcon className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                Spending Breakdown
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">{itemLabel}</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
-              Spending by Category
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {categoryBreakdown.length} categor{categoryBreakdown.length === 1 ? "y" : "ies"}
-            </p>
-          </div>
+          {toggleTabs}
         </div>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 pt-0">
@@ -60,7 +116,7 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={categoryBreakdown}
+                  data={chartData}
                   cx="50%"
                   cy="50%"
                   innerRadius={55}
@@ -69,7 +125,7 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
                   dataKey="value"
                   strokeWidth={0}
                 >
-                  {categoryBreakdown.map((entry, index) => (
+                  {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -98,7 +154,7 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
           </div>
 
           <div className="w-full flex-1 space-y-2">
-            {categoryBreakdown.map((item) => {
+            {chartData.map((item) => {
               const pct = total > 0 ? (item.value / total) * 100 : 0
               return (
                 <div key={item.name} className="group">

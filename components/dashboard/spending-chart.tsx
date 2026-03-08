@@ -4,17 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   AreaChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ComposedChart,
 } from "recharts"
 import { useExpense } from "@/contexts/expense-context"
+import { getChartDataWithSavings } from "@/lib/expense-utils"
 import { TrendingUp } from "lucide-react"
 
 export function SpendingChart() {
-  const { chartData, currency } = useExpense()
+  const { transactions, currency } = useExpense()
+  const chartData = getChartDataWithSavings(transactions, 12)
 
   return (
     <Card className="w-full border-border">
@@ -40,13 +44,17 @@ export function SpendingChart() {
               <div className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--chart-4))]" />
               <span className="text-muted-foreground">Expenses</span>
             </div>
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <span className="text-muted-foreground">Savings</span>
+            </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-4 text-foreground">
         <div className="h-[240px] sm:h-[300px] w-full min-w-0 text-muted-foreground [color:hsl(var(--muted-foreground))]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -100,7 +108,16 @@ export function SpendingChart() {
                 fill="url(#expenseGradient)"
                 name="Expenses"
               />
-            </AreaChart>
+              <Line
+                type="monotone"
+                dataKey="savings"
+                stroke="#10b981"
+                strokeWidth={2}
+                strokeDasharray="6 3"
+                dot={false}
+                name="Savings"
+              />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

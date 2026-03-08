@@ -62,6 +62,9 @@ export function RecentTransactions() {
     setSelectedDate,
     formatCurrency,
     deleteTransactionById,
+    tagMappings,
+    selectedTagFilter,
+    setSelectedTagFilter,
   } = useExpense()
   const { user, isSupabaseConfigured } = useAuth()
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
@@ -243,6 +246,42 @@ export function RecentTransactions() {
             ))}
           </div>
         </div>
+
+        {/* Tag filter */}
+        {tagMappings.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-accent-foreground">Tags</div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => { setSelectedTagFilter(null); resetPage() }}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                  selectedTagFilter === null
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
+              >
+                All
+              </button>
+              {tagMappings.map((mapping) => (
+                <button
+                  key={mapping.tag}
+                  type="button"
+                  onClick={() => { setSelectedTagFilter(mapping.tag === selectedTagFilter ? null : mapping.tag); resetPage() }}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                    selectedTagFilter === mapping.tag
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  {mapping.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <CardContent className="px-0 pb-0">
         <div className="divide-y divide-border">
@@ -279,8 +318,18 @@ export function RecentTransactions() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-foreground">{tx.description}</p>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="text-xs text-muted-foreground">{tx.category}</span>
+                          {(() => {
+                            const tagMapping = tx.tag
+                              ? tagMappings.find((m) => m.tag === tx.tag)
+                              : tagMappings.find((m) => m.categories.includes(tx.category))
+                            return tagMapping ? (
+                              <span className="inline-flex items-center rounded px-1 py-0.5 text-[10px] font-medium leading-none bg-accent text-accent-foreground">
+                                {tagMapping.label}
+                              </span>
+                            ) : null
+                          })()}
                           <span
                             className={cn(
                               "inline-flex items-center rounded px-1 py-0.5 text-[10px] font-medium leading-none",

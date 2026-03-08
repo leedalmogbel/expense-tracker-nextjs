@@ -38,6 +38,9 @@ export function AddBudgetModal({ open, onOpenChange }: AddBudgetModalProps) {
   const [month, setMonth] = useState(currentMonth)
   const [year, setYear] = useState(currentYear)
   const [categoryBudgets, setCategoryBudgets] = useState<Record<string, string>>({})
+  const [estimatedBudgets, setEstimatedBudgets] = useState<Record<string, string>>({})
+  const [savingsTarget, setSavingsTarget] = useState("")
+  const [showEstimates, setShowEstimates] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -58,6 +61,20 @@ export function AddBudgetModal({ open, onOpenChange }: AddBudgetModalProps) {
       })
     }
     setCategoryBudgets(budgetMap)
+
+    // Load estimated budgets and savings target
+    const estMap: Record<string, string> = {}
+    if (existing?.estimatedCategoryBudgets?.length) {
+      setShowEstimates(true)
+      CATEGORIES.forEach((cat) => {
+        const cb = existing.estimatedCategoryBudgets!.find((c) => c.category === cat)
+        estMap[cat] = cb ? String(cb.budget) : ""
+      })
+    } else {
+      CATEGORIES.forEach((cat) => { estMap[cat] = "" })
+    }
+    setEstimatedBudgets(estMap)
+    setSavingsTarget(existing?.savingsTarget ? String(existing.savingsTarget) : "")
   }, [open, year, month])
 
   const total = useMemo(() => {
@@ -83,11 +100,23 @@ export function AddBudgetModal({ open, onOpenChange }: AddBudgetModalProps) {
         icon: CATEGORY_ICONS[category] ?? "circle-dot",
       }))
 
+    const estBudgets: CategoryBudget[] = showEstimates
+      ? Object.entries(estimatedBudgets)
+          .filter(([_, val]) => (parseFloat(val) || 0) > 0)
+          .map(([category, val]) => ({
+            category,
+            budget: parseFloat(val) || 0,
+            icon: CATEGORY_ICONS[category] ?? "circle-dot",
+          }))
+      : []
+
     const budget: MonthlyBudget = {
       year,
       month,
       budget: total,
       categoryBudgets: catBudgets,
+      savingsTarget: parseFloat(savingsTarget) || undefined,
+      estimatedCategoryBudgets: estBudgets.length > 0 ? estBudgets : undefined,
     }
     setIsSubmitting(true)
     setCurrentBudget(budget)
@@ -145,11 +174,48 @@ export function AddBudgetModal({ open, onOpenChange }: AddBudgetModalProps) {
               </div>
             </div>
 
+            {/* Savings Target */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">Savings target</Label>
+              <div className="relative w-full">
+                <span className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-xs font-medium text-muted-foreground pointer-events-none">
+                  {currency.symbol}
+                </span>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  step="0.01"
+                  min="0"
+                  className="pl-7 h-11 rounded-lg border border-input bg-background text-sm"
+                  value={savingsTarget}
+                  onChange={(e) => setSavingsTarget(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">How much you want to save this month (income minus expenses).</p>
+            </div>
+
             <div className="space-y-1">
-              <Label className="text-sm font-medium text-foreground">Category budgets</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-foreground">Category budgets</Label>
+                <button
+                  type="button"
+                  onClick={() => setShowEstimates(!showEstimates)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  {showEstimates ? "Hide estimates" : "Show estimates"}
+                </button>
+              </div>
               <p className="text-xs text-muted-foreground">Set a limit for each category. Leave blank to skip.</p>
             </div>
 
+            {showEstimates && (
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="h-8 w-8 shrink-0" />
+                <span className="min-w-[100px] flex-1" />
+                <span className="w-28 text-center">Budget</span>
+                <span className="w-28 text-center">Estimated</span>
+              </div>
+            )}
             <div className="space-y-3">
               {CATEGORIES.map((cat) => {
                 const Icon = getCategoryIconComponent(CATEGORY_ICONS[cat] ?? "circle-dot")
@@ -161,7 +227,7 @@ export function AddBudgetModal({ open, onOpenChange }: AddBudgetModalProps) {
                     <span className="text-sm font-medium text-foreground min-w-[100px] flex-1 truncate">
                       {cat}
                     </span>
-                    <div className="relative w-32">
+                    <div className="relative w-28">
                       <span className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-xs font-medium text-muted-foreground pointer-events-none">
                         {currency.symbol}
                       </span>
@@ -175,6 +241,22 @@ export function AddBudgetModal({ open, onOpenChange }: AddBudgetModalProps) {
                         onChange={(e) => handleCategoryChange(cat, e.target.value)}
                       />
                     </div>
+                    {showEstimates && (
+                      <div className="relative w-28">
+                        <span className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-xs font-medium text-muted-foreground pointer-events-none">
+                          {currency.symbol}
+                        </span>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          step="0.01"
+                          min="0"
+                          className="pl-7 h-9 rounded-lg border border-input bg-background text-sm border-dashed"
+                          value={estimatedBudgets[cat] ?? ""}
+                          onChange={(e) => setEstimatedBudgets((prev) => ({ ...prev, [cat]: e.target.value }))}
+                        />
+                      </div>
+                    )}
                   </div>
                 )
               })}

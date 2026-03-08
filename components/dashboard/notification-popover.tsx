@@ -35,24 +35,22 @@ export function NotificationPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <span className="relative inline-flex shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-xl xl:h-12 xl:w-12"
-            aria-label={hasNotifications ? `${unreadCount} unread notifications` : "Notifications"}
-          >
-            <Bell className="h-5 w-5 px-0 xl:h-6 xl:w-6" />
-          </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-11 w-11 rounded-xl xl:h-12 xl:w-12"
+          aria-label={hasNotifications ? `${unreadCount} unread notifications` : "Notifications"}
+        >
+          <Bell className="h-5 w-5 xl:h-6 xl:w-6" />
           {hasNotifications && (
             <span
-              className="absolute right-0 top-0 flex min-h-[1.375rem] min-w-[1.375rem] items-center justify-center rounded-full border-2 border-background bg-destructive px-1 text-[11px] font-semibold tabular-nums leading-none text-white"
+              className="absolute -right-0.5 -top-0.5 flex min-h-[1.375rem] min-w-[1.375rem] items-center justify-center rounded-full border-2 border-background bg-destructive px-1 text-[11px] font-semibold tabular-nums leading-none text-white pointer-events-none"
               aria-hidden
             >
               {badgeLabel}
             </span>
           )}
-        </span>
+        </Button>
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-80 p-0 sm:w-96">
         {/* Header */}
