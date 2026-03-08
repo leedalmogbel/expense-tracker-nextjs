@@ -7,6 +7,7 @@ import { ProjectsView } from "@/components/dashboard/projects-view"
 import { staggerContainer, fadeUpItem } from "@/lib/utils"
 import { ShoppingCart, FolderKanban } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PremiumGate } from "@/components/auth/premium-gate"
 
 type Tab = "trips" | "projects"
 
@@ -14,6 +15,7 @@ export default function ShoppingTripsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("trips")
 
   return (
+    <PremiumGate feature="shopping_trips">
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
       {/* Tab toggle */}
       <div className="flex items-center gap-1 rounded-xl bg-muted/60 p-1 w-fit">
@@ -56,5 +58,6 @@ export default function ShoppingTripsPage() {
         </motion.div>
       </motion.div>
     </div>
+    </PremiumGate>
   )
 }

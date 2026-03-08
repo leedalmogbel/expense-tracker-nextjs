@@ -24,6 +24,8 @@ import {
   Grid3X3,
   Landmark,
   WifiOff,
+  Lock,
+  Shield,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useRef, useEffect, useCallback } from "react"
@@ -32,6 +34,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { useAuth } from "@/contexts/auth-context"
+import { usePremium } from "@/hooks/use-premium"
 import {
   Dropdown,
   DropdownTrigger,
@@ -41,17 +44,17 @@ import {
 } from "@heroui/react"
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
-  { href: "/dashboard/transactions", icon: Receipt, label: "Transactions" },
-  { href: "/dashboard/analytics", icon: PieChart, label: "Analytics" },
-  { href: "/dashboard/budgets", icon: Target, label: "Budgets" },
-  { href: "/dashboard/categories", icon: Grid3X3, label: "Categories" },
-  { href: "/dashboard/income", icon: BanknoteArrowUp, label: "Income" },
-  { href: "/dashboard/cards", icon: CreditCard, label: "Cards & Loans" },
-  { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips & Projects" },
-  { href: "/dashboard/accounts", icon: Landmark, label: "Accounts" },
-  { href: "/dashboard/members", icon: Users, label: "Members" },
-  { href: "/dashboard/activity", icon: Activity, label: "Activity" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Overview", premium: false },
+  { href: "/dashboard/transactions", icon: Receipt, label: "Transactions", premium: false },
+  { href: "/dashboard/analytics", icon: PieChart, label: "Analytics", premium: false },
+  { href: "/dashboard/budgets", icon: Target, label: "Budgets", premium: false },
+  { href: "/dashboard/categories", icon: Grid3X3, label: "Categories", premium: false },
+  { href: "/dashboard/income", icon: BanknoteArrowUp, label: "Income", premium: false },
+  { href: "/dashboard/cards", icon: CreditCard, label: "Cards & Loans", premium: true },
+  { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips & Projects", premium: true },
+  { href: "/dashboard/accounts", icon: Landmark, label: "Accounts", premium: false },
+  { href: "/dashboard/members", icon: Users, label: "Members", premium: true },
+  { href: "/dashboard/activity", icon: Activity, label: "Activity", premium: true },
 ]
 
 // Mobile: 4 primary tabs + "More" popover for the rest
@@ -226,8 +229,9 @@ function useOnlineStatus() {
 export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, signOut } = useAuth()
+  const { user, signOut, isSuperadmin } = useAuth()
   const { collapsed, setCollapsed } = useSidebar()
+  const { isPremium } = usePremium()
   const isOnline = useOnlineStatus()
   const displayName = getUserDisplayName(user?.email, user?.user_metadata)
   const initials = getInitials(displayName, user?.email)
@@ -244,6 +248,7 @@ export function DashboardSidebar() {
     isActive: boolean,
     isCollapsed: boolean
   ) => {
+    const isLocked = item.premium && !isPremium
     const linkContent = (
       <Link
         href={item.href}
@@ -252,11 +257,17 @@ export function DashboardSidebar() {
           linkBase,
           isActive ? linkActive : linkInactive,
           isCollapsed && linkCollapsed,
-          isCollapsed && isActive && "bg-accent text-accent-foreground"
+          isCollapsed && isActive && "bg-accent text-accent-foreground",
+          isLocked && "opacity-60"
         )}
       >
         <item.icon className="h-6 w-6 shrink-0" aria-hidden />
-        {!isCollapsed && <span>{item.label}</span>}
+        {!isCollapsed && (
+          <span className="flex-1 flex items-center justify-between">
+            {item.label}
+            {isLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground/60" />}
+          </span>
+        )}
       </Link>
     )
 
@@ -306,6 +317,23 @@ export function DashboardSidebar() {
           return renderNavLink(item, isActive, collapsed)
         })}
       </SidebarGroup>
+      {isSuperadmin && (
+        <>
+          {!collapsed && (
+            <p className="mt-4 mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              Admin
+            </p>
+          )}
+          {collapsed && <div className="my-2 mx-2 h-px bg-border" />}
+          <SidebarGroup>
+            {renderNavLink(
+              { href: "/admin", icon: Shield, label: "Admin Panel", premium: false },
+              pathname.startsWith("/admin"),
+              collapsed
+            )}
+          </SidebarGroup>
+        </>
+      )}
     </nav>
   )
 

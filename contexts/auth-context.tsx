@@ -3,7 +3,7 @@
 import * as React from "react"
 import type { User, Session } from "@supabase/supabase-js"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
-import { ensureProfile } from "@/lib/supabase-api"
+import { ensureProfile, fetchProfileRole, updateLastActive } from "@/lib/supabase-api"
 import { clearAllData } from "@/lib/storage"
 
 const DEV_BYPASS_AUTH =
@@ -25,6 +25,7 @@ type AuthContextValue = {
   user: User | null
   session: Session | null
   loading: boolean
+  isSuperadmin: boolean
   signInWithGoogle: (options?: { redirectTo?: string }) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   isSupabaseConfigured: boolean
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(MOCK_USER)
   const [session, setSession] = React.useState<Session | null>(null)
   const [loading, setLoading] = React.useState(!DEV_BYPASS_AUTH)
+  const [isSuperadmin, setIsSuperadmin] = React.useState(false)
 
   React.useEffect(() => {
     if (DEV_BYPASS_AUTH) return
@@ -60,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  // When user is set, ensure their profile row exists and is filled from Google (full_name)
+  // When user is set, ensure their profile row exists, fetch role, and update last active
   React.useEffect(() => {
     if (!user || !isSupabaseConfigured()) return
     const fullName =
@@ -68,6 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (user.user_metadata?.name as string)?.trim() ||
       null
     ensureProfile(user.id, fullName).catch(() => {})
+    fetchProfileRole(user.id).then(({ role }) => {
+      setIsSuperadmin(role === "superadmin")
+    }).catch(() => {})
+    updateLastActive(user.id)
   }, [user?.id, user?.user_metadata?.full_name, user?.user_metadata?.name])
 
   const signInWithGoogle = React.useCallback(
@@ -109,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     loading,
+    isSuperadmin,
     signInWithGoogle,
     signOut,
     isSupabaseConfigured: isSupabaseConfigured(),
@@ -124,6 +131,7 @@ export function useAuth() {
       user: null,
       session: null,
       loading: false,
+      isSuperadmin: false,
       signInWithGoogle: async () => ({ error: new Error("AuthProvider missing") }),
       signOut: async () => {},
       isSupabaseConfigured: isSupabaseConfigured(),

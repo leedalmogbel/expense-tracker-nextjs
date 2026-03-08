@@ -17,6 +17,7 @@ import { staggerContainer, fadeUpItem } from "@/lib/utils"
 import { Activity, Loader2 } from "lucide-react"
 import { ActivityFilters } from "@/components/dashboard/activity-filters"
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline"
+import { PremiumGate } from "@/components/auth/premium-gate"
 
 type Member = { user_id: string; role: string; full_name: string | null }
 
@@ -99,6 +100,7 @@ export default function ActivityPage() {
   }
 
   return (
+    <PremiumGate feature="activity_log">
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
       <div className="max-w-3xl">
         {/* Page header */}
@@ -156,5 +158,6 @@ export default function ActivityPage() {
         )}
       </div>
     </div>
+    </PremiumGate>
   )
 }

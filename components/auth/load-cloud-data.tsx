@@ -11,6 +11,9 @@ import { getTransactions, saveTransactions } from "@/lib/storage"
  * and merges them into localStorage (deduplicated by id) + refreshes the expense
  * context so the UI shows cloud data without duplicating existing local entries.
  * Runs once per session when the dashboard is first shown.
+ *
+ * Note: Cloud data LOADING is available to all signed-in users (so data isn't lost
+ * on logout/login). Cloud data SYNCING (write) is gated behind premium.
  */
 export function LoadCloudData() {
   const { user, isSupabaseConfigured } = useAuth()

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import type { CreditCardReminder } from "@/lib/types"
+import { PremiumGate } from "@/components/auth/premium-gate"
 
 type Tab = "cards" | "loans"
 
@@ -35,6 +36,7 @@ export default function CardsPage() {
   }, [])
 
   return (
+    <PremiumGate feature="cards_loans">
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -129,5 +131,6 @@ export default function CardsPage() {
         onSaved={handleSaved}
       />
     </div>
+    </PremiumGate>
   )
 }

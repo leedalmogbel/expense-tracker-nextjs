@@ -18,6 +18,7 @@ import { Users, Loader2 } from "lucide-react"
 import { MembersList } from "@/components/dashboard/members-list"
 import { InviteMemberCard } from "@/components/dashboard/invite-member-card"
 import { PendingInvitesCard } from "@/components/dashboard/pending-invites-card"
+import { PremiumGate } from "@/components/auth/premium-gate"
 
 type Member = { user_id: string; role: string; full_name: string | null }
 type Invite = { id: string; email: string; role: string; status: string; created_at: string }
@@ -85,6 +86,7 @@ export default function MembersPage() {
   }
 
   return (
+    <PremiumGate feature="household">
     <div className="w-full px-4 pt-8 pb-6 sm:px-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-10">
       <div className="max-w-3xl">
         {/* Page header */}
@@ -153,5 +155,6 @@ export default function MembersPage() {
         )}
       </div>
     </div>
+    </PremiumGate>
   )
 }

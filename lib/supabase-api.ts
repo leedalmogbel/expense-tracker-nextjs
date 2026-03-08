@@ -92,7 +92,7 @@ export async function getOrCreateAccount(
     .eq("household_id", householdId)
     .eq("name", name)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (existing?.id) return { accountId: existing.id, error: null }
 
@@ -124,7 +124,7 @@ export async function getOrCreateCategory(
     .eq("name", name)
     .eq("type", type)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (existing?.id) return { categoryId: existing.id, error: null }
 
@@ -397,6 +397,10 @@ export async function syncSingleTransaction(
 
   const { householdId, error: houseError } = await getOrCreateDefaultHousehold(userId)
   if (houseError || !householdId) return { success: false, error: houseError ?? "Could not get household." }
+
+  // Ensure user is in household_members (required by RLS policies on accounts, categories, etc.)
+  const { error: memberError } = await ensureHouseholdMember(householdId, userId, "owner")
+  if (memberError) return { success: false, error: memberError }
 
   const type: "income" | "expense" = transaction.amount >= 0 ? "income" : "expense"
   const categoryName = transaction.category || "Other"
