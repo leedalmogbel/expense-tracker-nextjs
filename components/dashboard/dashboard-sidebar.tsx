@@ -43,23 +43,49 @@ import {
   Button as HeroUIButton,
 } from "@heroui/react"
 
-const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Overview", premium: false },
-  { href: "/dashboard/transactions", icon: Receipt, label: "Transactions", premium: false },
-  { href: "/dashboard/analytics", icon: PieChart, label: "Analytics", premium: false },
-  { href: "/dashboard/budgets", icon: Target, label: "Budgets", premium: false },
-  { href: "/dashboard/categories", icon: Grid3X3, label: "Categories", premium: false },
-  { href: "/dashboard/income", icon: BanknoteArrowUp, label: "Income", premium: false },
-  { href: "/dashboard/cards", icon: CreditCard, label: "Cards & Loans", premium: true },
-  { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips & Projects", premium: true },
-  { href: "/dashboard/accounts", icon: Landmark, label: "Accounts", premium: false },
-  { href: "/dashboard/members", icon: Users, label: "Members", premium: true },
-  { href: "/dashboard/activity", icon: Activity, label: "Activity", premium: true },
+type NavItem = { href: string; icon: typeof LayoutDashboard; label: string; premium: boolean }
+type NavGroup = { label: string; items: NavItem[] }
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Main",
+    items: [
+      { href: "/dashboard", icon: LayoutDashboard, label: "Overview", premium: false },
+      { href: "/dashboard/transactions", icon: Receipt, label: "Transactions", premium: false },
+      { href: "/dashboard/income", icon: BanknoteArrowUp, label: "Income", premium: false },
+    ],
+  },
+  {
+    label: "Planning",
+    items: [
+      { href: "/dashboard/budgets", icon: Target, label: "Budgets", premium: false },
+      { href: "/dashboard/analytics", icon: PieChart, label: "Analytics", premium: false },
+      { href: "/dashboard/categories", icon: Grid3X3, label: "Categories", premium: false },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { href: "/dashboard/accounts", icon: Landmark, label: "Accounts", premium: false },
+      { href: "/dashboard/cards", icon: CreditCard, label: "Cards & Loans", premium: true },
+    ],
+  },
+  {
+    label: "Household",
+    items: [
+      { href: "/dashboard/members", icon: Users, label: "Members", premium: true },
+      { href: "/dashboard/shopping-trips", icon: ShoppingBasket, label: "Trips & Projects", premium: true },
+      { href: "/dashboard/activity", icon: Activity, label: "Activity", premium: true },
+    ],
+  },
 ]
 
+// Flat list for mobile
+const allNavItems = navGroups.flatMap((g) => g.items)
+
 // Mobile: 4 primary tabs + "More" popover for the rest
-const mobileTabItems = navItems.slice(0, 4)
-const mobileMoreItems = navItems.slice(4)
+const mobileTabItems = allNavItems.slice(0, 4)
+const mobileMoreItems = allNavItems.slice(4)
 
 function getUserDisplayName(email: string | undefined, metadata?: { full_name?: string; name?: string } | null): string {
   if (metadata?.full_name?.trim()) return metadata.full_name.trim()
@@ -244,7 +270,7 @@ export function DashboardSidebar() {
   const linkCollapsed = "justify-center px-0 w-full min-w-[44px] rounded-l-lg border-l-0"
 
   const renderNavLink = (
-    item: (typeof navItems)[0],
+    item: NavItem,
     isActive: boolean,
     isCollapsed: boolean
   ) => {
@@ -305,18 +331,23 @@ export function DashboardSidebar() {
   )
 
   const desktopContent = (
-    <nav className="px-3 py-2">
-      {!collapsed && (
-        <p className="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Dashboard
-        </p>
-      )}
-      <SidebarGroup>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href
-          return renderNavLink(item, isActive, collapsed)
-        })}
-      </SidebarGroup>
+    <nav className="px-3 py-2 space-y-3">
+      {navGroups.map((group) => (
+        <div key={group.label}>
+          {!collapsed && (
+            <p className="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {group.label}
+            </p>
+          )}
+          {collapsed && group.label !== "Main" && <div className="mx-2 h-px bg-border mb-1" />}
+          <SidebarGroup>
+            {group.items.map((item) => {
+              const isActive = pathname === item.href
+              return renderNavLink(item, isActive, collapsed)
+            })}
+          </SidebarGroup>
+        </div>
+      ))}
       {isSuperadmin && (
         <>
           {!collapsed && (
