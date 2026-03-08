@@ -636,7 +636,7 @@ export default function SettingsPage() {
                       <CloudUpload className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground">Save to Supabase</p>
+                      <p className="text-sm font-medium text-foreground">Save to Cloud</p>
                       <p className="text-xs text-muted-foreground mt-0.5">Back up transactions and budgets</p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5" />
@@ -982,18 +982,18 @@ export default function SettingsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Supabase Sync Dialog */}
+      {/* Cloud Sync Dialog */}
       <Dialog open={supabaseOpen} onOpenChange={setSupabaseOpen}>
         <DialogContent className="sm:max-w-md gap-0 overflow-hidden rounded-xl border-border p-0 shadow-2xl">
           <DialogHeader className="px-6 pt-6 pb-4">
             <DialogTitle className="font-heading text-xl font-semibold tracking-tight">
-              Save to Supabase
+              Save to Cloud
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
               {syncSuccess
                 ? "Your data has been backed up successfully."
                 : user
-                  ? "Transactions and budgets will be saved to your household in Supabase."
+                  ? "Transactions and budgets will be saved to your household in the cloud."
                   : "Enter your email to associate this backup (legacy export). For household sync, sign in with Google first."}
             </DialogDescription>
           </DialogHeader>

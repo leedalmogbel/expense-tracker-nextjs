@@ -113,7 +113,7 @@ export default function ProfilePage() {
             <Card className="border-border">
               <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
                 <div className="flex items-center gap-3 w-full">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-1))]/10 text-[hsl(var(--chart-1))]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-1))]/10 text-[hsl(var(--chart-1))]">
                     <UserCircle className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
@@ -156,7 +156,7 @@ export default function ProfilePage() {
             <Card className="border-border">
               <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
                 <div className="flex items-center gap-3 w-full">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
                     <Receipt className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
@@ -179,7 +179,7 @@ export default function ProfilePage() {
                         className="rounded-xl border border-border bg-card p-3 space-y-2"
                       >
                         <div
-                          className="flex h-8 w-8 items-center justify-center rounded-lg"
+                          className="flex h-9 w-9 items-center justify-center rounded-xl"
                           style={{ backgroundColor: `${stat.color}15` }}
                         >
                           <Icon className="h-4 w-4" style={{ color: stat.color }} />
@@ -203,7 +203,7 @@ export default function ProfilePage() {
             <Card className="border-border">
               <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
                 <div className="flex items-center gap-3 w-full">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]">
                     <BarChart3 className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">

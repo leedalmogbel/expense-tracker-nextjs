@@ -62,25 +62,25 @@ export default function AnalyticsPage() {
         </motion.div>
 
         {/* Income / Expense summary */}
-        <motion.div variants={fadeUpItem} className="grid gap-4 grid-cols-2">
-          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/80 p-4 sm:p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <motion.div variants={fadeUpItem} className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <ArrowUpRight className="h-5 w-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Income</p>
-              <p className="text-lg sm:text-xl font-bold font-heading text-foreground tabular-nums">
+              <p className="text-lg sm:text-xl font-bold font-heading text-foreground tabular-nums truncate">
                 {formatCurrency(monthlyIncome)}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/80 p-4 sm:p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
               <ArrowDownRight className="h-5 w-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Expense</p>
-              <p className="text-lg sm:text-xl font-bold font-heading text-foreground tabular-nums">
+              <p className="text-lg sm:text-xl font-bold font-heading text-foreground tabular-nums truncate">
                 {formatCurrency(-monthlyExpenses)}
               </p>
             </div>
@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
           <Card className="w-full border-border">
             <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
               <div className="flex items-center gap-3 w-full">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
                   <BarChart3 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">

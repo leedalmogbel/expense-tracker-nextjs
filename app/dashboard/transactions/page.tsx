@@ -36,8 +36,8 @@ export default function TransactionsPage() {
         {/* Balance summary */}
         <motion.div variants={fadeUpItem}>
           <div className="grid gap-3 grid-cols-1">
-            <div className="flex items-center gap-3 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/10 via-primary/5 to-card p-4 sm:p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <div className="flex items-center gap-3 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-primary/5 to-card p-4 sm:p-5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Wallet className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -47,8 +47,8 @@ export default function TransactionsPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/80 p-4 sm:p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <ArrowUpRight className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -58,8 +58,8 @@ export default function TransactionsPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/80 p-4 sm:p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
                 <ArrowDownRight className="h-5 w-5" />
               </div>
               <div className="min-w-0">

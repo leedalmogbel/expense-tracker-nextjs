@@ -109,7 +109,7 @@ export default function CategoriesPage() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Icon className="h-6 w-6" />
             </div>
             <div>
@@ -146,7 +146,7 @@ export default function CategoriesPage() {
                           className="flex items-center gap-3 px-4 py-3 sm:px-6 transition-colors hover:bg-muted/20"
                         >
                           <div className={cn(
-                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
                             isIncome ? "bg-primary/10 text-primary" : "bg-muted/80 dark:bg-muted/40 text-muted-foreground"
                           )}>
                             <TxIcon className="h-4.5 w-4.5" />
@@ -215,16 +215,16 @@ export default function CategoriesPage() {
           {/* Expense categories */}
           <motion.div variants={fadeUpItem}>
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4 px-1">Expenses</h2>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {expenseCategories.map((cat) => {
                 const Icon = getCategoryIconComponent(cat.icon)
                 return (
                   <button
                     key={cat.name}
                     onClick={() => setSelectedCategory(cat.name)}
-                    className="group flex flex-col items-center gap-2.5 rounded-2xl border border-border bg-card/80 p-4 sm:p-5 transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.97]"
+                    className="group flex flex-col items-center gap-2.5 rounded-2xl border border-border bg-card p-4 sm:p-5 transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.97]"
                   >
-                    <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110">
+                    <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110">
                       <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
                     <div className="text-center min-w-0 w-full">
@@ -245,7 +245,7 @@ export default function CategoriesPage() {
                 onClick={() => openAddExpenseRef.current?.()}
                 className="flex flex-col items-center gap-2.5 rounded-2xl border border-dashed border-border p-4 sm:p-5 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 active:scale-[0.97]"
               >
-                <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-muted text-muted-foreground">
                   <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">Add Expense</p>
@@ -257,16 +257,16 @@ export default function CategoriesPage() {
           {incomeCategories.length > 0 && (
             <motion.div variants={fadeUpItem}>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4 px-1">Income</h2>
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {incomeCategories.map((cat) => {
                   const Icon = getCategoryIconComponent(cat.icon)
                   return (
                     <button
                       key={cat.name}
                       onClick={() => setSelectedCategory(cat.name)}
-                      className="group flex flex-col items-center gap-2.5 rounded-2xl border border-border bg-card/80 p-4 sm:p-5 transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.97]"
+                      className="group flex flex-col items-center gap-2.5 rounded-2xl border border-border bg-card p-4 sm:p-5 transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.97]"
                     >
-                      <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110">
+                      <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110">
                         <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                       </div>
                       <div className="text-center min-w-0 w-full">
