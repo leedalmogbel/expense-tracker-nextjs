@@ -1,7 +1,7 @@
 "use client"
 
 import type { Transaction, MonthlyBudget } from "./types"
-import type { AccountType, CategoryType } from "./supabase-db-types"
+import type { AccountType, CategoryType, Subscription } from "./supabase-db-types"
 import { PAYMENT_METHOD_TO_ACCOUNT_TYPE } from "./supabase-db-types"
 import { supabase } from "./supabase"
 import { getTransactions, getCurrentMonthlyBudget } from "./storage"
@@ -877,4 +877,78 @@ export async function createNotificationForHousehold(
       })
     )
   )
+}
+
+// ─── Premium / Subscription ─────────────────────────────────────────────────
+
+/**
+ * Fetch the user's subscription row. Returns null plan if no row exists (free user).
+ */
+export async function fetchSubscription(
+  userId: string
+): Promise<{ subscription: Subscription | null; error: string | null }> {
+  if (!supabase) return { subscription: null, error: "Supabase is not configured." }
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle()
+  if (error) return { subscription: null, error: error.message }
+  return { subscription: (data as Subscription) ?? null, error: null }
+}
+
+/**
+ * Fetch the user's profile role.
+ */
+export async function fetchProfileRole(
+  userId: string
+): Promise<{ role: string; error: string | null }> {
+  if (!supabase) return { role: "user", error: "Supabase is not configured." }
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .single()
+  if (error) return { role: "user", error: error.message }
+  return { role: (data?.role as string) ?? "user", error: null }
+}
+
+/**
+ * Call the auto_grant_early_adopter RPC. Returns the resulting plan.
+ */
+export async function autoGrantEarlyAdopter(
+  userId: string
+): Promise<{ granted: boolean; error: string | null }> {
+  if (!supabase) return { granted: false, error: "Supabase is not configured." }
+  const { data, error } = await supabase.rpc("auto_grant_early_adopter", {
+    p_user_id: userId,
+  })
+  if (error) return { granted: false, error: error.message }
+  return { granted: !!data, error: null }
+}
+
+/**
+ * Redeem a promo code for the user.
+ */
+export async function redeemPromoCode(
+  userId: string,
+  code: string
+): Promise<{ success: boolean; error: string | null }> {
+  if (!supabase) return { success: false, error: "Supabase is not configured." }
+  const { data, error } = await supabase.rpc("redeem_promo_code", {
+    p_user_id: userId,
+    p_code: code.trim().toUpperCase(),
+  })
+  if (error) return { success: false, error: error.message }
+  return { success: !!data, error: null }
+}
+
+/**
+ * Update the user's last_active_at timestamp.
+ */
+export async function updateLastActive(
+  userId: string
+): Promise<void> {
+  if (!supabase) return
+  await supabase.rpc("update_last_active", { p_user_id: userId }).catch(() => {})
 }

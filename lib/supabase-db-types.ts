@@ -2,9 +2,14 @@
  * Types matching the Supabase schema in docs/supabase.md
  */
 
+export type ProfileRole = "user" | "superadmin"
+
 export type Profile = {
   id: string
   full_name: string | null
+  role: ProfileRole
+  last_active_at: string
+  is_active: boolean
   created_at: string
 }
 
@@ -72,6 +77,42 @@ export type Budget = {
   year: number
   amount: number
   created_at: string
+}
+
+export type SubscriptionPlan = "free" | "premium"
+export type SubscriptionSource = "early_adopter" | "promo_code" | "manual" | "payment"
+
+export type Subscription = {
+  id: string
+  user_id: string
+  plan: SubscriptionPlan
+  source: SubscriptionSource
+  promo_code_id: string | null
+  granted_by: string | null
+  started_at: string
+  expires_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type PromoCode = {
+  id: string
+  code: string
+  description: string | null
+  max_uses: number
+  current_uses: number
+  duration_days: number | null
+  is_active: boolean
+  created_by: string | null
+  created_at: string
+  expires_at: string | null
+}
+
+export type PromoCodeRedemption = {
+  id: string
+  promo_code_id: string
+  user_id: string
+  redeemed_at: string
 }
 
 /** Payment method name (app) -> account type (DB). Unknown names default to bank in API. */
