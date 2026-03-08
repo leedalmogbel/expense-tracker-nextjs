@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 
+// Safe: NODE_ENV is set at build time by Next.js — always "production" in prod builds.
+// This can never activate in production regardless of env vars.
 const DEV_BYPASS_AUTH =
   process.env.NODE_ENV === "development" &&
   process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === "true"

@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/lib/supabase/server"
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+// In-memory rate limiter: 5 invites per user per hour
+const RATE_LIMIT = 5
+const RATE_WINDOW_MS = 60 * 60 * 1000
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+
 export async function POST(request: NextRequest) {
   try {
     if (!process.env.RESEND_API_KEY) {
@@ -17,12 +25,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Rate limiting
+    const now = Date.now()
+    const entry = rateLimitMap.get(user.id)
+    if (entry && now < entry.resetAt) {
+      if (entry.count >= RATE_LIMIT) {
+        return NextResponse.json({ error: "Too many invitations. Try again later." }, { status: 429 })
+      }
+      entry.count++
+    } else {
+      rateLimitMap.set(user.id, { count: 1, resetAt: now + RATE_WINDOW_MS })
+    }
+
     const body = await request.json()
     const { email, inviteId, inviterName } = body
 
-    if (!email || !inviteId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    // Input validation
+    if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email) || email.length > 254) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 })
     }
+    if (!inviteId || typeof inviteId !== "string" || !UUID_REGEX.test(inviteId)) {
+      return NextResponse.json({ error: "Invalid invitation" }, { status: 400 })
+    }
+    const safeName = typeof inviterName === "string" ? inviterName.slice(0, 100) : "Someone"
 
     // Look up household name from invite
     const { data: invite } = await supabase
@@ -33,11 +58,12 @@ export async function POST(request: NextRequest) {
 
     const householdName = (invite?.households as { name: string } | null)?.name || "a household"
 
-    // Build invite link
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      request.headers.get("origin") ||
-      "http://localhost:3000"
+    // Build invite link with validated origin
+    const allowedOrigins = [process.env.NEXT_PUBLIC_APP_URL, "http://localhost:3000"].filter(Boolean)
+    const requestOrigin = request.headers.get("origin")
+    const baseUrl = allowedOrigins.includes(requestOrigin ?? "")
+      ? requestOrigin!
+      : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")
     const inviteLink = `${baseUrl}/auth/invite?id=${inviteId}`
 
     const { error } = await resend.emails.send({
@@ -45,7 +71,7 @@ export async function POST(request: NextRequest) {
       to: [email],
       subject: `You've been invited to ${householdName} on Dosh Mate`,
       html: buildInviteEmailHtml({
-        inviterName: inviterName || "Someone",
+        inviterName: safeName,
         householdName,
         inviteLink,
       }),
@@ -53,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("[api/invites/send] Resend error:", error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: "Failed to send invitation email" }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

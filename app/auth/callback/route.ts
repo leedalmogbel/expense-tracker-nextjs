@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
+const ALLOWED_REDIRECT_PREFIXES = ["/dashboard", "/auth/invite"]
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
   const next = searchParams.get("next") ?? "/dashboard"
-  const nextPath = next.startsWith("/") ? next : "/dashboard"
+  const nextPath = ALLOWED_REDIRECT_PREFIXES.some(
+    (p) => next === p || next.startsWith(p + "/") || next.startsWith(p + "?")
+  )
+    ? next
+    : "/dashboard"
 
   const forwardedHost = request.headers.get("x-forwarded-host")
   const forwardedProto = request.headers.get("x-forwarded-proto") ?? "http"
@@ -13,10 +19,6 @@ export async function GET(request: Request) {
   const baseUrl = !isLocalEnv && forwardedHost
     ? `${forwardedProto}://${forwardedHost}`
     : origin
-
-  console.log("[auth/callback] code:", code, "baseUrl:", baseUrl, "origin:", origin)
-  console.log("[auth/callback] forwardedHost:", forwardedHost, "forwardedProto:", forwardedProto)
-  console.log("[auth/callback] cookies:", request.headers.get("cookie"))
 
   if (code) {
     const supabase = await createClient()
