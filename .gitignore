@@ -10,3 +10,8 @@ node_modules/
 .DS_Store
 .pnpm-store/
 .env
+
+# PWA - generated service worker
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js

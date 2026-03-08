@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { Eye, EyeOff, ArrowRight, Mail, Lock, User } from "lucide-react"
+import { Eye, EyeOff, ArrowRight, Mail, Lock, User, TrendingUp, PiggyBank, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -78,86 +78,94 @@ export function LoginForm() {
   return (
     <div className="flex min-h-screen">
       {/* Left Panel - Branding */}
-      <div className="relative hidden w-1/2 flex-col justify-between bg-primary p-12 lg:flex">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_70%)]" />
-        <div className="relative">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-foreground/20">
+      <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden lg:flex">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-600 dark:from-primary dark:via-primary/90 dark:to-emerald-700" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/10 to-transparent" />
+
+        {/* Decorative shapes */}
+        <div className="absolute top-20 right-10 h-64 w-64 rounded-full border border-white/[0.08]" />
+        <div className="absolute top-32 right-20 h-48 w-48 rounded-full border border-white/[0.05]" />
+        <div className="absolute -bottom-20 -left-10 h-80 w-80 rounded-full bg-white/[0.03]" />
+
+        <div className="relative p-10 xl:p-12">
+          <Link href="/" className="inline-flex items-center gap-2.5">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/20 backdrop-blur-sm">
               <Image src="/assets/doshmate-logo.png" alt="Dosh Mate" width={40} height={40} className="object-contain" />
             </div>
-            <span className="text-xl font-bold font-heading text-primary-foreground">Dosh Mate</span>
+            <span className="text-xl font-bold font-heading text-white tracking-tight">Dosh Mate</span>
           </Link>
         </div>
 
-        <div className="relative space-y-6">
-          <h2 className="font-heading text-4xl font-bold leading-tight text-primary-foreground">
-            Financial clarity<br />starts with a<br />single step.
+        <div className="relative px-10 xl:px-12">
+          <h2 className="font-heading text-3xl font-bold leading-tight text-white xl:text-4xl">
+            Financial clarity
+            <br />starts with a
+            <br />single step.
           </h2>
-          <p className="max-w-sm text-primary-foreground/80 leading-relaxed">
-            Join thousands of users who have transformed their relationship with money using Dosh Mate.
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70 xl:text-base">
+            Join users who have transformed their relationship with money using Dosh Mate.
           </p>
 
-          <div className="flex items-center gap-6 pt-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold font-heading text-primary-foreground">50K+</p>
-              <p className="text-xs text-primary-foreground/70">Active Users</p>
+          {/* Feature pills */}
+          <div className="mt-8 flex flex-wrap gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-white/90">
+              <TrendingUp className="h-3 w-3" />
+              Analytics
             </div>
-            <div className="h-8 w-px bg-primary-foreground/20" />
-            <div className="text-center">
-              <p className="text-2xl font-bold font-heading text-primary-foreground">$2.1M</p>
-              <p className="text-xs text-primary-foreground/70">Savings Tracked</p>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-white/90">
+              <PiggyBank className="h-3 w-3" />
+              Savings
             </div>
-            <div className="h-8 w-px bg-primary-foreground/20" />
-            <div className="text-center">
-              <p className="text-2xl font-bold font-heading text-primary-foreground">4.9/5</p>
-              <p className="text-xs text-primary-foreground/70">User Rating</p>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-white/90">
+              <Shield className="h-3 w-3" />
+              Secure
             </div>
           </div>
         </div>
 
-        <p className="relative text-xs text-primary-foreground/50">
-          &copy; {new Date().getFullYear()} Dosh Mate. All rights reserved.
-        </p>
+        <div className="relative px-10 pb-10 xl:px-12 xl:pb-12">
+          <p className="text-xs text-white/40" suppressHydrationWarning>
+            &copy; {new Date().getFullYear()} Dosh Mate. All rights reserved.
+          </p>
+        </div>
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2 lg:px-20">
-        <div className="mx-auto w-full max-w-md">
+      <div className="flex w-full flex-col justify-center px-6 py-10 lg:w-[55%] lg:px-16 xl:px-24">
+        <div className="mx-auto w-full max-w-[420px]">
           {/* Mobile Logo */}
-          <div className="mb-8 flex items-center gap-2 lg:hidden">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-card">
+          <div className="mb-10 lg:hidden">
+            <Link href="/" className="inline-flex items-center gap-2.5">
+              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl">
                 <Image src="/assets/doshmate-logo.png" alt="Dosh Mate" width={36} height={36} className="object-contain" />
               </div>
-              <span className="text-xl font-bold font-heading text-foreground">Dosh Mate</span>
+              <span className="text-lg font-bold font-heading text-foreground tracking-tight">Dosh Mate</span>
             </Link>
           </div>
 
           <div>
-            <h1 className="font-heading text-2xl font-bold text-foreground">
+            <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
               {isSupabaseConfigured ? "Sign in to Dosh Mate" : activeTab === "login" ? "Welcome back" : "Create your account"}
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
               {isSupabaseConfigured
-                ? "Use your Google account to access your private expense data."
+                ? "Use your Google account to access your expense data."
                 : activeTab === "login"
                   ? "Sign in to continue managing your finances."
                   : "Start your journey to better financial health."}
             </p>
           </div>
 
-          {/* Google sign-in (required when Supabase is configured) */}
+          {/* Google sign-in */}
           {isSupabaseConfigured && (
-            <>
-              <p className="mt-4 text-sm text-muted-foreground">
-                Sign in with Google to access your private expense data. No guest access.
-              </p>
-              <Button
+            <div className="mt-8">
+              <button
                 type="button"
-                variant="outline"
-                className="w-full gap-2 mt-4"
                 onClick={handleGoogleSignIn}
                 disabled={googleLoading || authLoading}
+                className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted/50 hover:shadow-md disabled:opacity-50"
               >
                 {googleLoading || authLoading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -165,142 +173,150 @@ export function LoginForm() {
                   <GoogleIcon />
                 )}
                 Continue with Google
-              </Button>
+              </button>
               {googleError && (
-                <p className="mt-2 text-sm text-destructive">{googleError}</p>
+                <p className="mt-3 text-sm text-destructive">{googleError}</p>
               )}
-                </>
+              <p className="mt-6 text-center text-xs text-muted-foreground/70">
+                Your data is private and only accessible after signing in.
+              </p>
+            </div>
           )}
 
           {!isSupabaseConfigured && (
-          <>
-          <div className="mt-6 flex rounded-lg bg-muted p-1">
-            <button
-              className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-                activeTab === "login"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              onClick={() => setActiveTab("login")}
-            >
-              Sign In
-            </button>
-            <button
-              className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-                activeTab === "signup"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              onClick={() => setActiveTab("signup")}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            {activeTab === "signup" && (
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-foreground">
-                  Full Name
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    placeholder="John Doe"
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                Email Address
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                  Password
-                </Label>
-                {activeTab === "login" && (
-                  <button type="button" className="text-xs text-primary hover:underline">
-                    Forgot password?
-                  </button>
-                )}
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  className="pl-10 pr-10"
-                  required
-                />
+            <>
+              {/* Tab switcher */}
+              <div className="mt-8 flex rounded-xl bg-muted/60 p-1">
                 <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full gap-2" disabled={isLoading}>
-              {isLoading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
-              ) : (
-                <>
-                  {activeTab === "login" ? "Sign In" : "Create Account"}
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </form>
-          </>
-          )}
-
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            {isSupabaseConfigured ? (
-              "Your data is private and only accessible after signing in with Google."
-            ) : activeTab === "login" ? (
-              <>
-                {"Don't have an account? "}
-                <button
-                  className="font-medium text-primary hover:underline"
-                  onClick={() => setActiveTab("signup")}
-                >
-                  Sign up
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{" "}
-                <button
-                  className="font-medium text-primary hover:underline"
+                  className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
+                    activeTab === "login"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                   onClick={() => setActiveTab("login")}
                 >
-                  Sign in
+                  Sign In
                 </button>
-              </>
-            )}
-          </p>
+                <button
+                  className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
+                    activeTab === "signup"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  onClick={() => setActiveTab("signup")}
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                {activeTab === "signup" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                      Full Name
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
+                      <Input
+                        id="name"
+                        placeholder="John Doe"
+                        className="h-11 pl-10 rounded-xl border-border/60 bg-card"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                    Email Address
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      className="h-11 pl-10 rounded-xl border-border/60 bg-card"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                      Password
+                    </Label>
+                    {activeTab === "login" && (
+                      <button type="button" className="text-xs font-medium text-primary hover:underline">
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      className="h-11 pl-10 pr-10 rounded-xl border-border/60 bg-card"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-11 gap-2 rounded-xl text-sm font-semibold shadow-sm shadow-primary/20"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
+                  ) : (
+                    <>
+                      {activeTab === "login" ? "Sign In" : "Create Account"}
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </>
+          )}
+
+          {!isSupabaseConfigured && (
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              {activeTab === "login" ? (
+                <>
+                  {"Don't have an account? "}
+                  <button
+                    className="font-medium text-primary hover:underline"
+                    onClick={() => setActiveTab("signup")}
+                  >
+                    Sign up
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    className="font-medium text-primary hover:underline"
+                    onClick={() => setActiveTab("login")}
+                  >
+                    Sign in
+                  </button>
+                </>
+              )}
+            </p>
+          )}
         </div>
       </div>
     </div>

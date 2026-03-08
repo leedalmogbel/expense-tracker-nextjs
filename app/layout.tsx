@@ -17,9 +17,18 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: 'Dosh Mate - Smart Expense Tracking',
   description: 'Track, analyze, and optimize your spending with Dosh Mate. The modern expense tracker that helps you take control of your finances.',
+  applicationName: 'Dosh Mate',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Dosh Mate',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: '/assets/doshmate-logo.png',
-    apple: '/assets/doshmate-logo.png',
+    apple: '/icon-192x192.png',
   },
 }
 

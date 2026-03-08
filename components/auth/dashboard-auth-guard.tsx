@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 
@@ -12,21 +12,40 @@ const DEV_BYPASS_AUTH =
  * Redirects to /login when Supabase is configured but the user is not signed in.
  * Renders children only when the user is signed in or when auth is not configured.
  * In local dev with NEXT_PUBLIC_DEV_BYPASS_AUTH=true, always renders children.
+ * When offline, allows access to cached local data regardless of auth state.
  */
 export function DashboardAuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, isSupabaseConfigured } = useAuth()
   const router = useRouter()
+  const [isOnline, setIsOnline] = useState(true)
+
+  useEffect(() => {
+    setIsOnline(navigator.onLine)
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [])
 
   useEffect(() => {
     if (DEV_BYPASS_AUTH) return
     if (loading) return
+    // If offline, allow access to cached data regardless of auth state
+    if (!isOnline) return
     if (isSupabaseConfigured && !user) {
       router.replace("/login")
       return
     }
-  }, [loading, user, isSupabaseConfigured, router])
+  }, [loading, user, isSupabaseConfigured, router, isOnline])
 
   if (DEV_BYPASS_AUTH) return <>{children}</>
+
+  // Allow offline access even without auth — data is all in localStorage
+  if (!isOnline) return <>{children}</>
 
   if (loading) {
     return (
