@@ -125,7 +125,7 @@ export function LoanList({ openAddLoanRef }: LoanListProps = {}) {
         <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
           <div className="flex items-start justify-between gap-4 w-full">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
                 <Home className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -177,7 +177,7 @@ export function LoanList({ openAddLoanRef }: LoanListProps = {}) {
                   <div key={loan.id} className="py-3 first:pt-3">
                     {/* Loan header row */}
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 text-primary mt-0.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))] mt-0.5">
                         <Home className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">

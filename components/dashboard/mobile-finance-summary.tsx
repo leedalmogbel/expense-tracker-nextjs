@@ -1,11 +1,10 @@
 "use client"
 
 import { memo, useMemo } from "react"
-import { TrendingUp, TrendingDown, Minus, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { TrendingUp, TrendingDown, Minus, Target, Calendar, PiggyBank } from "lucide-react"
 import { useExpense } from "@/contexts/expense-context"
 import { getMonthOverMonthChange } from "@/lib/expense-utils"
 import { cn } from "@/lib/utils"
-import { Progress } from "@/components/ui/progress"
 
 export const MobileFinanceSummary = memo(function MobileFinanceSummary() {
   const {
@@ -48,16 +47,17 @@ export const MobileFinanceSummary = memo(function MobileFinanceSummary() {
   const fmtCompact = (n: number) => {
     const abs = Math.abs(n)
     if (abs >= 1_000_000) return currency.symbol + (abs / 1_000_000).toFixed(1) + "M"
-    if (abs >= 10_000) return currency.symbol + (abs / 1_000).toFixed(1) + "k"
+    if (abs >= 100_000) return currency.symbol + (abs / 1_000).toFixed(1) + "k"
+    if (abs >= 1_000) return currency.symbol + abs.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
     return currency.symbol + abs.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
 
   return (
     <div className="space-y-3 lg:hidden">
       {/* ── Hero balance ───────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/8 to-card border border-primary/10 p-5 shadow-md shadow-primary/[0.06] dark:from-primary/25 dark:via-primary/10 dark:to-card/60 dark:border-primary/15 dark:shadow-lg dark:shadow-black/30">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/12 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[hsl(var(--chart-3))]/8 rounded-full blur-2xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/25 via-primary/10 to-card border border-primary/15 p-5 shadow-md shadow-primary/[0.06] dark:from-primary/30 dark:via-primary/12 dark:to-card/60 dark:border-primary/20 dark:shadow-lg dark:shadow-black/30">
+        <div className="absolute top-0 right-0 w-52 h-52 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-[hsl(var(--chart-3))]/8 rounded-full blur-2xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
 
         <div className="relative">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -66,7 +66,9 @@ export const MobileFinanceSummary = memo(function MobileFinanceSummary() {
           <p className="mt-1.5 text-4xl font-bold font-heading text-foreground tracking-tight drop-shadow-sm">
             {fmt(totalBalance)}
           </p>
-          <div className="mt-1.5 flex items-center gap-1.5">
+
+          {/* Trend pill */}
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-background/60 backdrop-blur-sm px-2.5 py-1 border border-border/50">
             {balanceChange.trend === "up" ? (
               <TrendingUp className="h-3.5 w-3.5 text-primary" />
             ) : balanceChange.trend === "down" ? (
@@ -76,95 +78,106 @@ export const MobileFinanceSummary = memo(function MobileFinanceSummary() {
             )}
             <span
               className={cn(
-                "text-xs font-medium",
+                "text-xs font-semibold",
                 balanceChange.trend === "up" ? "text-primary" : balanceChange.trend === "down" ? "text-destructive" : "text-muted-foreground"
               )}
             >
               {balanceChange.text}
             </span>
-            <span className="text-xs text-muted-foreground">vs last month</span>
+            <span className="text-[10px] text-muted-foreground">vs last month</span>
           </div>
 
           {/* Income & Expense pills */}
-          <div className="mt-4 flex gap-2.5">
-            <div className="flex-1 flex items-center gap-2.5 rounded-xl bg-primary/6 border border-primary/10 dark:bg-primary/8 dark:border-primary/15 px-3 py-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/12 dark:bg-primary/18">
-                <ArrowUpRight className="h-4 w-4 text-primary" />
-              </div>
-              <div className="min-w-0">
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border/60 px-3 py-2.5">
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 shrink-0 rounded-full bg-primary" />
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Income</p>
-                <div className="flex items-center gap-1">
-                  <p className="text-sm font-bold text-foreground tabular-nums truncate">{fmtCompact(monthlyIncome)}</p>
-                  {incomeChange.trend !== "neutral" && (
-                    <span className={cn("text-[9px] font-medium", incomeChange.trend === "up" ? "text-primary" : "text-destructive")}>
-                      {incomeChange.trend === "up" ? "\u2191" : "\u2193"}
-                    </span>
-                  )}
-                </div>
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <p className="text-base font-bold text-foreground tabular-nums">{fmtCompact(monthlyIncome)}</p>
+                {incomeChange.trend !== "neutral" && (
+                  <span className={cn("text-[9px] font-semibold shrink-0", incomeChange.trend === "up" ? "text-primary" : "text-destructive")}>
+                    {incomeChange.trend === "up" ? "\u2191" : "\u2193"}
+                  </span>
+                )}
               </div>
             </div>
-            <div className="flex-1 flex items-center gap-2.5 rounded-xl bg-destructive/6 border border-destructive/10 dark:bg-destructive/8 dark:border-destructive/15 px-3 py-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-destructive/12 dark:bg-destructive/18">
-                <ArrowDownRight className="h-4 w-4 text-destructive" />
-              </div>
-              <div className="min-w-0">
+            <div className="rounded-xl bg-card/80 backdrop-blur-sm border border-border/60 px-3 py-2.5">
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 shrink-0 rounded-full bg-destructive" />
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Expenses</p>
-                <div className="flex items-center gap-1">
-                  <p className="text-sm font-bold text-foreground tabular-nums truncate">{fmtCompact(monthlyExpenses)}</p>
-                  {expenseChange.trend !== "neutral" && (
-                    <span className={cn("text-[9px] font-medium", expenseChange.trend === "up" ? "text-destructive" : "text-primary")}>
-                      {expenseChange.trend === "up" ? "\u2191" : "\u2193"}
-                    </span>
-                  )}
-                </div>
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <p className="text-base font-bold text-foreground tabular-nums">{fmtCompact(monthlyExpenses)}</p>
+                {expenseChange.trend !== "neutral" && (
+                  <span className={cn("text-[9px] font-semibold shrink-0", expenseChange.trend === "up" ? "text-destructive" : "text-primary")}>
+                    {expenseChange.trend === "up" ? "\u2191" : "\u2193"}
+                  </span>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Budget + Today row ─────────────────────────── */}
-      <div className="flex gap-3">
-        {/* Budget progress */}
-        <div className="flex-1 rounded-2xl border border-border bg-card p-4 shadow-sm shadow-black/[0.02] dark:shadow-lg dark:shadow-black/15">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Budget</p>
-          {budgetTotal > 0 ? (
-            <>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-lg font-bold font-heading text-foreground tabular-nums">{spentPct.toFixed(0)}%</span>
-                <span className="text-[10px] text-muted-foreground">used</span>
+      {/* ── Stats rows ────────────────────────────────── */}
+      <div className="space-y-2">
+        {/* Budget */}
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm shadow-black/[0.02] dark:shadow-lg dark:shadow-black/15">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-3))]/10">
+            <Target className="h-4.5 w-4.5 text-[hsl(var(--chart-3))]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Budget</p>
+            {budgetTotal > 0 ? (
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-sm font-bold font-heading text-foreground tabular-nums">{spentPct.toFixed(0)}%</p>
+                <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${spentPct}%`,
+                      backgroundColor: isOverBudget ? "hsl(var(--destructive))" : "hsl(var(--primary))",
+                    }}
+                  />
+                </div>
+                <p className={cn("text-[10px] tabular-nums shrink-0", isOverBudget ? "text-destructive font-medium" : "text-muted-foreground")}>
+                  {isOverBudget ? "Over " + fmtCompact(monthlyExpenses - budgetTotal) : fmtCompact(budgetRemaining) + " left"}
+                </p>
               </div>
-              <Progress
-                value={spentPct}
-                className={cn("mt-2 h-1.5", isOverBudget && "[&_[data-slot=indicator]]:bg-destructive")}
-              />
-              <p className={cn("mt-1.5 text-[10px] tabular-nums", isOverBudget ? "text-destructive font-medium" : "text-muted-foreground")}>
-                {isOverBudget ? "Over by " + fmtCompact(monthlyExpenses - budgetTotal) : fmtCompact(budgetRemaining) + " left"}
-              </p>
-            </>
-          ) : (
-            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-              No budget set
-            </p>
-          )}
+            ) : (
+              <p className="mt-0.5 text-xs text-muted-foreground">Not set</p>
+            )}
+          </div>
         </div>
 
-        {/* Today + Savings */}
-        <div className="flex-1 flex flex-col gap-3">
-          <div className="flex-1 rounded-2xl border border-border bg-card p-4 shadow-sm shadow-black/[0.02] dark:shadow-lg dark:shadow-black/15">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Today</p>
-            <p className="mt-1 text-lg font-bold font-heading text-foreground tabular-nums">{fmtCompact(spentToday)}</p>
+        {/* Today */}
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm shadow-black/[0.02] dark:shadow-lg dark:shadow-black/15">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-4))]/10">
+            <Calendar className="h-4.5 w-4.5 text-[hsl(var(--chart-4))]" />
           </div>
-          <div className="flex-1 rounded-2xl border border-border bg-card p-4 shadow-sm shadow-black/[0.02] dark:shadow-lg dark:shadow-black/15">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Today</p>
+            <p className="mt-0.5 text-sm font-bold font-heading text-foreground tabular-nums">{fmtCompact(spentToday)}</p>
+          </div>
+        </div>
+
+        {/* Savings */}
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm shadow-black/[0.02] dark:shadow-lg dark:shadow-black/15">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+            <PiggyBank className="h-4.5 w-4.5 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Savings</p>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <p className="text-lg font-bold font-heading text-foreground tabular-nums">{fmtCompact(monthlySavings)}</p>
-              <span className={cn(
-                "text-[10px] font-medium tabular-nums",
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <p className="text-sm font-bold font-heading text-foreground tabular-nums">{fmtCompact(monthlySavings)}</p>
+              <p className={cn(
+                "text-[10px] font-semibold tabular-nums",
                 savingsRate > 0 ? "text-primary" : savingsRate < 0 ? "text-destructive" : "text-muted-foreground"
               )}>
-                ({Math.round(savingsRate)}%)
-              </span>
+                {Math.round(savingsRate)}% rate
+              </p>
             </div>
           </div>
         </div>

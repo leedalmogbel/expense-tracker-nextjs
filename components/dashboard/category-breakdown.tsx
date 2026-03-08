@@ -67,7 +67,7 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
         <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
           <div className="flex items-center justify-between gap-3 w-full">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
                 <PieChartIcon className="h-5 w-5" />
               </div>
               <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
@@ -97,7 +97,7 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
       <CardHeader className="px-4 pt-5 pb-3 sm:px-6 sm:pt-6 sm:pb-4 border-b border-border">
         <div className="flex items-center justify-between gap-3 w-full">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]">
               <PieChartIcon className="h-5 w-5" />
             </div>
             <div className="min-w-0">
@@ -176,7 +176,7 @@ export const CategoryBreakdown = memo(function CategoryBreakdown() {
                       </span>
                     </div>
                   </div>
-                  <div className="h-1.5 w-full rounded-full bg-muted/50 overflow-hidden">
+                  <div className="h-2 w-full rounded-full bg-muted/50 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{ width: `${pct}%`, backgroundColor: item.color }}

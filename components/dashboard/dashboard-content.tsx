@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { getCreditCardReminders, isOnboardingDismissed } from "@/lib/storage"
 import { getDueReminders } from "@/lib/expense-utils"
 import { OnboardingWizard } from "@/components/dashboard/onboarding-wizard"
+import { HelpGuideModal } from "@/components/dashboard/help-guide-modal"
 
 /**
  * App shell content area: flex layout with spacer (no margin) so content is flush with sidebar.
@@ -27,6 +28,7 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
   const [addBudgetOpen, setAddBudgetOpen] = useState(false)
   const [addIncomeOpen, setAddIncomeOpen] = useState(false)
   const [onboardingOpen, setOnboardingOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   useEffect(() => {
     if (!isOnboardingDismissed()) {
@@ -75,9 +77,9 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
         aria-hidden
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardTopbar />
+        <DashboardTopbar onOpenHelp={() => setHelpOpen(true)} />
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-20 lg:pb-8 lg:px-6">
-          <DashboardMobileHeader />
+          <DashboardMobileHeader onOpenHelp={() => setHelpOpen(true)} />
           <div className="px-4 pt-4 sm:px-6 lg:px-8">
             <PendingInviteBanner />
           </div>
@@ -89,6 +91,7 @@ export function DashboardContent({ children }: { children: React.ReactNode }) {
       <AddBudgetModal open={addBudgetOpen} onOpenChange={setAddBudgetOpen} />
       <AddIncomeModal open={addIncomeOpen} onOpenChange={setAddIncomeOpen} />
       <OnboardingWizard open={onboardingOpen} onOpenChange={setOnboardingOpen} />
+      <HelpGuideModal open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   )
 }

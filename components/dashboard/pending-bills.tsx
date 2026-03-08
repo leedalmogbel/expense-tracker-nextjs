@@ -72,22 +72,25 @@ export const PendingBills = memo(function PendingBills() {
 
   return (
     <Card className="border-border">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-chart-4/10">
-              <Receipt className="h-4.5 w-4.5 text-[hsl(var(--chart-4))]" />
+      <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
+        <div className="flex items-start justify-between gap-4 w-full">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-4))]/10 text-[hsl(var(--chart-4))]">
+              <Receipt className="h-5 w-5" />
             </div>
-            <CardTitle className="text-base font-semibold">
-              Pending Bills This Month
-            </CardTitle>
+            <div className="min-w-0">
+              <CardTitle className="font-heading text-lg font-semibold text-foreground tracking-tight">
+                Pending Bills
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">This month</p>
+            </div>
           </div>
-          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
             {paidCount} of {totalBills}
           </span>
         </div>
       </CardHeader>
-      <CardContent className="pt-0 space-y-2">
+      <CardContent className="p-4 sm:p-6 pt-0 space-y-2">
         {/* Unpaid bills */}
         {unpaidBills.map((bill) => {
           const IconComp = getCategoryIconComponent(
@@ -99,7 +102,7 @@ export const PendingBills = memo(function PendingBills() {
               key={bill.recurring.id}
               className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:bg-muted/30"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/60">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted/60">
                 <IconComp className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">

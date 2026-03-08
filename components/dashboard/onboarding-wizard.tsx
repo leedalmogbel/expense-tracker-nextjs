@@ -12,6 +12,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
+  HelpCircle,
 } from "lucide-react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -52,6 +53,14 @@ const steps = [
     icons: [CreditCard, Users],
     iconColors: ["text-[hsl(var(--chart-5))]", "text-[hsl(var(--chart-3))]"],
     iconBgs: ["bg-[hsl(var(--chart-5))]/10", "bg-[hsl(var(--chart-3))]/10"],
+  },
+  {
+    title: "Need Help?",
+    description:
+      "Tap the ? icon in the top bar anytime to see step-by-step guides for every feature. You'll find tips on how to use each page.",
+    icons: [HelpCircle],
+    iconColors: ["text-primary"],
+    iconBgs: ["bg-primary/10"],
   },
 ]
 

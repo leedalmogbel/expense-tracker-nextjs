@@ -70,7 +70,7 @@ export const ActivityFeed = memo(function ActivityFeed() {
       <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
         <div className="flex items-start justify-between gap-4 w-full">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Activity className="h-5 w-5" />
             </div>
             <div className="min-w-0">
@@ -101,7 +101,7 @@ export const ActivityFeed = memo(function ActivityFeed() {
               </div>
               <span
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-medium tabular-nums",
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums",
                   group.dayNet >= 0
                     ? "bg-primary/10 text-primary"
                     : "bg-destructive/10 text-destructive"
@@ -125,11 +125,11 @@ export const ActivityFeed = memo(function ActivityFeed() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: ti * 0.04, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  className="flex items-center gap-3 px-4 py-2.5 sm:px-6 sm:py-3 transition-colors hover:bg-muted/20 active:bg-muted/40"
+                  className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3.5 transition-colors hover:bg-muted/20 active:bg-muted/40"
                 >
                   <div
                     className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
                       isIncome
                         ? "bg-primary/10 text-primary"
                         : "bg-muted/80 dark:bg-muted/40 text-muted-foreground"
@@ -145,22 +145,21 @@ export const ActivityFeed = memo(function ActivityFeed() {
                       <span className="text-[11px] text-muted-foreground truncate">{tx.category}</span>
                       {tx.paymentMethod && (
                         <>
-                          <span className="text-[10px] text-muted-foreground/40">&bull;</span>
+                          <span className="text-[10px] text-muted-foreground/40 shrink-0">&bull;</span>
                           <span className="text-[11px] text-muted-foreground truncate">
                             {tx.paymentMethod}
                           </span>
                         </>
                       )}
-                      <span className="text-[10px] text-muted-foreground/40">&bull;</span>
                       <span
                         className={cn(
-                          "inline-flex items-center rounded px-1 py-0.5 text-[10px] font-medium leading-none",
+                          "inline-flex items-center rounded px-1 py-0.5 text-[10px] font-medium leading-none shrink-0",
                           (tx.scope ?? "personal") === "household"
                             ? "bg-primary/10 text-primary"
                             : "bg-muted text-muted-foreground"
                         )}
                       >
-                        {(tx.scope ?? "personal") === "household" ? "Household" : "Personal"}
+                        {(tx.scope ?? "personal") === "household" ? "HH" : "Personal"}
                       </span>
                     </div>
                   </div>

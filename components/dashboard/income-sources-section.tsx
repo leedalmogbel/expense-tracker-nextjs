@@ -70,7 +70,7 @@ export function IncomeSourcesSection() {
           <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
             <div className="flex items-start justify-between gap-4 w-full">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <DollarSign className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
@@ -124,7 +124,7 @@ export function IncomeSourcesSection() {
         <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
           <div className="flex items-start justify-between gap-4 w-full">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <DollarSign className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -157,7 +157,7 @@ export function IncomeSourcesSection() {
                 >
                   <div className="shrink-0">
                     {received ? (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10">
                         <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                     ) : (

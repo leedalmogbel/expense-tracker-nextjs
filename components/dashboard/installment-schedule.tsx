@@ -103,8 +103,8 @@ export function InstallmentSchedule({ installment, card, onUpdated, onDelete }: 
           <p className="text-sm font-medium text-foreground truncate">
             {installment.items.join(", ")}
           </p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className="text-xs text-muted-foreground truncate">
               {formatCurrency(installment.totalAmount)} &middot; {installment.totalMonths}mo &middot; {formatCurrency(installment.monthlyInstallment)}/mo
             </span>
           </div>
@@ -145,83 +145,147 @@ export function InstallmentSchedule({ installment, card, onUpdated, onDelete }: 
       {/* Expanded schedule */}
       {expanded && (
         <div className="border-t border-border">
-          {/* Table header */}
-          <div className="grid grid-cols-[3rem_1fr_5rem_5rem_auto] gap-2 px-4 py-2 bg-muted/30 text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-            <span>#</span>
-            <span>Date</span>
-            <span className="text-right">Amount</span>
-            <span className="text-right">Balance</span>
-            <span className="text-center w-20">Status</span>
+          {/* Mobile: stacked card layout */}
+          <div className="sm:hidden divide-y divide-border/50">
+            {installment.payments.map((payment) => {
+              const isPaid = payment.status === "paid"
+              const paidAmount = payment.paidAmount ?? installment.monthlyInstallment
+              const paidUpTo = installment.payments
+                .filter((p) => p.monthNumber <= payment.monthNumber && p.status === "paid")
+                .reduce((sum, p) => sum + (p.paidAmount ?? installment.monthlyInstallment), 0)
+              const runningBalance = installment.totalAmount - paidUpTo
+              const displayDate = isPaid && payment.paidDate ? payment.paidDate : payment.expectedDate
+
+              return (
+                <div
+                  key={payment.monthNumber}
+                  className={cn("px-4 py-2.5", isPaid && "bg-emerald-500/5")}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xs font-medium text-muted-foreground w-5 shrink-0">#{payment.monthNumber}</span>
+                      <span className="text-xs text-foreground">
+                        {format(new Date(displayDate + "T00:00:00"), "dd-MMM-yy")}
+                      </span>
+                    </div>
+                    <span className="text-xs font-semibold tabular-nums text-foreground shrink-0">
+                      {isPaid ? formatCurrency(paidAmount) : formatCurrency(installment.monthlyInstallment)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 mt-1.5">
+                    <div className="flex items-center gap-2">
+                      {isPaid ? (
+                        <>
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5"
+                          >
+                            <CheckCircle2 className="h-2.5 w-2.5" />
+                            Paid
+                          </Badge>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                            onClick={() => handleUnmarkPaid(payment.monthNumber)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border border-amber-500/20 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-colors active:scale-95"
+                          onClick={() => openMarkPaid(payment.monthNumber)}
+                        >
+                          <Clock className="h-2.5 w-2.5" />
+                          Mark Paid
+                        </button>
+                      )}
+                    </div>
+                    {isPaid && (
+                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                        Bal: {formatCurrency(Math.max(0, runningBalance))}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
 
-          {/* Payment rows */}
-          {installment.payments.map((payment) => {
-            const isPaid = payment.status === "paid"
-            const paidAmount = payment.paidAmount ?? installment.monthlyInstallment
-            // Running balance: total - sum of all paid amounts up to this month
-            const paidUpTo = installment.payments
-              .filter((p) => p.monthNumber <= payment.monthNumber && p.status === "paid")
-              .reduce((sum, p) => sum + (p.paidAmount ?? installment.monthlyInstallment), 0)
-            const runningBalance = installment.totalAmount - paidUpTo
+          {/* Desktop: table layout */}
+          <div className="hidden sm:block">
+            <div className="grid grid-cols-[2.5rem_1fr_5rem_5rem_auto] gap-2 px-4 py-2 bg-muted/30 text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+              <span>#</span>
+              <span>Date</span>
+              <span className="text-right">Amount</span>
+              <span className="text-right">Balance</span>
+              <span className="text-center w-20">Status</span>
+            </div>
+            {installment.payments.map((payment) => {
+              const isPaid = payment.status === "paid"
+              const paidAmount = payment.paidAmount ?? installment.monthlyInstallment
+              const paidUpTo = installment.payments
+                .filter((p) => p.monthNumber <= payment.monthNumber && p.status === "paid")
+                .reduce((sum, p) => sum + (p.paidAmount ?? installment.monthlyInstallment), 0)
+              const runningBalance = installment.totalAmount - paidUpTo
+              const displayDate = isPaid && payment.paidDate ? payment.paidDate : payment.expectedDate
 
-            const displayDate = isPaid && payment.paidDate
-              ? payment.paidDate
-              : payment.expectedDate
-
-            return (
-              <div
-                key={payment.monthNumber}
-                className={cn(
-                  "grid grid-cols-[3rem_1fr_5rem_5rem_auto] gap-2 items-center px-4 py-2 text-sm border-t border-border/50",
-                  isPaid && "bg-emerald-500/5"
-                )}
-              >
-                <span className="text-xs text-muted-foreground">{payment.monthNumber}</span>
-                <span className="text-xs text-foreground truncate">
-                  {format(new Date(displayDate + "T00:00:00"), "dd-MMM-yy")}
-                </span>
-                <span className="text-xs text-right tabular-nums text-foreground">
-                  {isPaid ? formatCurrency(paidAmount) : formatCurrency(installment.monthlyInstallment)}
-                </span>
-                <span className="text-xs text-right tabular-nums text-muted-foreground">
-                  {isPaid ? formatCurrency(Math.max(0, runningBalance)) : "\u2014"}
-                </span>
-                <div className="flex items-center justify-center w-20">
-                  {isPaid ? (
-                    <div className="flex items-center gap-1">
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] px-1 py-0 h-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5"
-                      >
-                        <CheckCircle2 className="h-2.5 w-2.5" />
-                        Paid
-                      </Badge>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5 text-muted-foreground hover:text-foreground"
-                        onClick={() => handleUnmarkPaid(payment.monthNumber)}
-                      >
-                        <Pencil className="h-2.5 w-2.5" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-5 px-1.5 text-[10px] gap-0.5"
-                      onClick={() => openMarkPaid(payment.monthNumber)}
-                    >
-                      <Clock className="h-2.5 w-2.5" />
-                      Mark Paid
-                    </Button>
+              return (
+                <div
+                  key={payment.monthNumber}
+                  className={cn(
+                    "grid grid-cols-[2.5rem_1fr_5rem_5rem_auto] gap-2 items-center px-4 py-2 text-sm border-t border-border/50",
+                    isPaid && "bg-emerald-500/5"
                   )}
+                >
+                  <span className="text-xs text-muted-foreground">{payment.monthNumber}</span>
+                  <span className="text-xs text-foreground truncate">
+                    {format(new Date(displayDate + "T00:00:00"), "dd-MMM-yy")}
+                  </span>
+                  <span className="text-xs text-right tabular-nums text-foreground">
+                    {isPaid ? formatCurrency(paidAmount) : formatCurrency(installment.monthlyInstallment)}
+                  </span>
+                  <span className="text-xs text-right tabular-nums text-muted-foreground">
+                    {isPaid ? formatCurrency(Math.max(0, runningBalance)) : "\u2014"}
+                  </span>
+                  <div className="flex items-center justify-center w-20">
+                    {isPaid ? (
+                      <div className="flex items-center gap-1">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-1 py-0 h-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5"
+                        >
+                          <CheckCircle2 className="h-2.5 w-2.5" />
+                          Paid
+                        </Badge>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleUnmarkPaid(payment.monthNumber)}
+                        >
+                          <Pencil className="h-2.5 w-2.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium border border-amber-500/20 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-colors active:scale-95"
+                        onClick={() => openMarkPaid(payment.monthNumber)}
+                      >
+                        <Clock className="h-2.5 w-2.5" />
+                        Mark Paid
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
 
           {/* Note for completed */}
           {installment.note && (

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Moon, Sun, Settings, User, LogOut } from "lucide-react"
+import { Moon, Sun, Settings, User, LogOut, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
@@ -30,7 +30,11 @@ function getInitials(displayName: string, email: string | undefined): string {
   return "?"
 }
 
-export function DashboardMobileHeader() {
+interface DashboardMobileHeaderProps {
+  onOpenHelp?: () => void
+}
+
+export function DashboardMobileHeader({ onOpenHelp }: DashboardMobileHeaderProps) {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { user, signOut } = useAuth()
@@ -58,6 +62,15 @@ export function DashboardMobileHeader() {
         >
           <Sun className="h-6 w-6 rotate-0 scale-100 dark:scale-0" />
           <Moon className="absolute h-6 w-6 rotate-90 scale-0 dark:rotate-0 dark:scale-100" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-13 w-13 min-h-11 min-w-11 rounded-lg touch-manipulation active:scale-95"
+          onClick={onOpenHelp}
+          aria-label="Help guide"
+        >
+          <HelpCircle className="h-6 w-6" />
         </Button>
         <NotificationPopover />
 
@@ -91,7 +104,7 @@ export function DashboardMobileHeader() {
             <DropdownItem
               key="profile"
               startContent={<User className="h-4 w-4 shrink-0" />}
-              onPress={() => router.push("/dashboard/settings")}
+              onPress={() => router.push("/dashboard/profile")}
               className="py-2"
             >
               Profile

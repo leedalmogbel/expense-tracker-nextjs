@@ -19,7 +19,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@heroui/react"
-import { MoreVertical, Pencil, Trash2, Receipt, CalendarRange, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { MoreVertical, Pencil, Trash2, Receipt, CalendarRange, X, ChevronLeft, ChevronRight, SlidersHorizontal, ChevronDown } from "lucide-react"
 import type { Transaction } from "@/lib/types"
 import { EditTransactionModal } from "@/components/dashboard/edit-transaction-modal"
 import { deleteHouseholdTransactionByAppId } from "@/lib/supabase-api"
@@ -72,9 +72,11 @@ export function RecentTransactions() {
   const [customStart, setCustomStart] = useState("")
   const [customEnd, setCustomEnd] = useState("")
   const [page, setPage] = useState(1)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const categoryOptions = ["all", ...CATEGORIES.map((c) => normalizeCategory(c))]
   const filteredTotal = filteredTransactions.reduce((sum, t) => sum + t.amount, 0)
+  const activeFilterCount = (dateRangeFilter ? 1 : 0) + (selectedCategoryFilter ? 1 : 0) + (selectedTagFilter ? 1 : 0) + (selectedMonthFilter ? 1 : 0)
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / PAGE_SIZE))
@@ -161,8 +163,27 @@ export function RecentTransactions() {
         </div>
       </CardHeader>
 
-      {/* Filters section — separate from header for breathing room */}
-      <div className="px-4 py-4 sm:px-6 sm:py-5 space-y-4 border-b border-border bg-muted/20">
+      {/* Filters toggle + collapsible section */}
+      <div className="border-b border-border">
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((v) => !v)}
+          className="flex w-full items-center justify-between px-4 py-3 sm:px-6 bg-muted/20 hover:bg-muted/30 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground">Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+                {activeFilterCount}
+              </span>
+            )}
+          </div>
+          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", filtersOpen && "rotate-180")} />
+        </button>
+
+        {filtersOpen && (
+      <div className="px-4 py-4 sm:px-6 sm:py-5 space-y-4 bg-muted/20">
         {/* Date range filter */}
         <div className="space-y-3">
           <div className="flex items-center gap-1.5 text-xs font-medium text-accent-foreground">
@@ -281,6 +302,8 @@ export function RecentTransactions() {
               ))}
             </div>
           </div>
+        )}
+      </div>
         )}
       </div>
       <CardContent className="px-0 pb-0">

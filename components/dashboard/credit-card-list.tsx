@@ -199,7 +199,7 @@ export function CreditCardList({ onEdit, onRefresh }: CreditCardListProps) {
       <Card className="w-full border-border">
         <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
           <div className="flex items-center gap-3 w-full">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]">
               <CreditCard className="h-5 w-5" />
             </div>
             <div className="min-w-0">
@@ -271,7 +271,7 @@ export function CreditCardList({ onEdit, onRefresh }: CreditCardListProps) {
                   <div key={r.id} className="py-3 first:pt-3">
                     {/* Card header row */}
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-5))]/10 text-[hsl(var(--chart-5))]">
                         <CreditCard className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -327,7 +327,7 @@ export function CreditCardList({ onEdit, onRefresh }: CreditCardListProps) {
                     </div>
 
                     {/* Card actions row */}
-                    <div className="mt-1.5 ml-[52px] flex items-center gap-1">
+                    <div className="mt-1.5 sm:ml-[48px] flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -350,7 +350,7 @@ export function CreditCardList({ onEdit, onRefresh }: CreditCardListProps) {
 
                     {/* Credit limit usage chart */}
                     {r.creditLimit && (
-                      <div className="mt-3 ml-[52px] rounded-xl border border-border bg-card/50 p-3">
+                      <div className="mt-3 sm:ml-[48px] rounded-xl border border-border bg-card/50 p-3">
                         <CreditLimitChart
                           used={activeBalance}
                           limit={r.creditLimit}
@@ -359,7 +359,7 @@ export function CreditCardList({ onEdit, onRefresh }: CreditCardListProps) {
                     )}
 
                     {/* Payment status row */}
-                    <div className="mt-2 ml-[52px] flex items-center gap-2 flex-wrap">
+                    <div className="mt-2 sm:ml-[48px] flex items-center gap-2 flex-wrap">
                       <Badge
                         variant="outline"
                         className={cn(
@@ -424,7 +424,7 @@ export function CreditCardList({ onEdit, onRefresh }: CreditCardListProps) {
 
                     {/* Installments section */}
                     {cardInstallments.length > 0 && (
-                      <div className="mt-3 ml-[52px] space-y-2">
+                      <div className="mt-3 sm:ml-[48px] space-y-2">
                         <div className="flex items-center gap-2">
                           <Package className="h-3.5 w-3.5 text-muted-foreground" />
                           <span className="text-xs font-medium text-foreground">
@@ -458,7 +458,7 @@ export function CreditCardList({ onEdit, onRefresh }: CreditCardListProps) {
                     )}
 
                     {/* Add installment button */}
-                    <div className="mt-2 ml-[52px]">
+                    <div className="mt-2 sm:ml-[48px]">
                       <Button
                         variant="outline"
                         size="sm"

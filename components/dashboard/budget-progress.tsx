@@ -20,7 +20,7 @@ export function BudgetProgress({ onManage }: BudgetProgressProps) {
         <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
           <div className="flex items-start justify-between gap-4 w-full">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
                 <Target className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -51,7 +51,7 @@ export function BudgetProgress({ onManage }: BudgetProgressProps) {
       <CardHeader className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-border">
         <div className="flex items-start justify-between gap-4 w-full">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]">
               <Target className="h-5 w-5" />
             </div>
             <div className="min-w-0">

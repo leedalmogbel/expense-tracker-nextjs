@@ -103,44 +103,47 @@ export const StatCards = memo(function StatCards() {
           key={stat.label}
           className={cn(
             "border-border transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/20 active:scale-[0.98] overflow-hidden",
-            i === 0 && "relative bg-gradient-to-br from-primary/15 via-primary/5 to-card dark:from-primary/20 dark:via-primary/8 dark:to-card/60"
+            i === 0 && "relative bg-gradient-to-br from-primary/20 via-primary/8 to-card dark:from-primary/25 dark:via-primary/10 dark:to-card/60"
           )}
         >
           {i === 0 && (
             <div className="absolute top-0 right-0 w-28 h-28 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           )}
-          <CardContent className="relative p-4 sm:p-5">
+          <CardContent className="relative p-5 sm:p-6">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground truncate">
                 {stat.label}
               </p>
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${stat.iconBg}`}>
-                <stat.icon className="h-4.5 w-4.5" />
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${stat.iconBg}`}>
+                <stat.icon className="h-5 w-5" />
               </div>
             </div>
             <p className="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold font-heading text-foreground break-all tracking-tight">
               {stat.value}
             </p>
-            <div className="mt-2 flex items-center gap-1.5">
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5"
+              style={{
+                backgroundColor: stat.trend === "up" ? "hsl(var(--primary) / 0.1)" : stat.trend === "down" ? "hsl(var(--destructive) / 0.1)" : "hsl(var(--muted))",
+              }}
+            >
               {stat.trend === "up" ? (
-                <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                <TrendingUp className="h-3 w-3 text-primary" />
               ) : stat.trend === "down" ? (
-                <TrendingDown className="h-3.5 w-3.5 text-destructive" />
+                <TrendingDown className="h-3 w-3 text-destructive" />
               ) : (
-                <Minus className="h-3.5 w-3.5 text-muted-foreground" />
+                <Minus className="h-3 w-3 text-muted-foreground" />
               )}
               <span
                 className={cn(
-                  "text-xs font-medium",
+                  "text-[10px] font-semibold",
                   stat.trend === "up" ? "text-primary" : stat.trend === "down" ? "text-destructive" : "text-muted-foreground"
                 )}
               >
                 {stat.change}
               </span>
-              <span className="text-xs text-muted-foreground">vs last month</span>
             </div>
             {stat.description && (
-              <p className="mt-1 text-xs text-muted-foreground">{stat.description}</p>
+              <p className="mt-1.5 text-xs text-muted-foreground">{stat.description}</p>
             )}
           </CardContent>
         </Card>

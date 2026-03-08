@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Search, Plus, Settings, Moon, Sun, ChevronDown, Receipt, Target, ArrowUpCircle } from "lucide-react"
+import { Search, Plus, Settings, Moon, Sun, ChevronDown, Receipt, Target, ArrowUpCircle, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -17,7 +17,11 @@ import { useTheme } from "next-themes"
 import { useRef, useEffect } from "react"
 import { NotificationPopover } from "./notification-popover"
 
-export function DashboardTopbar() {
+interface DashboardTopbarProps {
+  onOpenHelp?: () => void
+}
+
+export function DashboardTopbar({ onOpenHelp }: DashboardTopbarProps) {
   const { openAddExpenseRef, openAddBudgetRef, openAddIncomeRef } = useDashboardActions()
   const { searchQuery, setSearchQuery } = useExpense()
   const { theme, setTheme } = useTheme()
@@ -65,6 +69,15 @@ export function DashboardTopbar() {
         >
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 xl:h-6 xl:w-6" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 xl:h-6 xl:w-6" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground xl:h-12 xl:w-12"
+          onClick={onOpenHelp}
+          aria-label="Help guide"
+        >
+          <HelpCircle className="h-5 w-5 xl:h-6 xl:w-6" />
         </Button>
         <NotificationPopover />
         {/* <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl" asChild>
