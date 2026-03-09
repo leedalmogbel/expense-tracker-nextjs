@@ -39,12 +39,14 @@ interface AddIncomeSourceModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSaved?: () => void
+  initialEditSource?: IncomeSource | null
 }
 
 export function AddIncomeSourceModal({
   open,
   onOpenChange,
   onSaved,
+  initialEditSource,
 }: AddIncomeSourceModalProps) {
   const [sources, setSources] = useState<IncomeSource[]>([])
   const [editingSource, setEditingSource] = useState<IncomeSource | null>(null)
@@ -65,9 +67,13 @@ export function AddIncomeSourceModal({
   useEffect(() => {
     if (open) {
       loadSources()
-      resetForm()
+      if (initialEditSource) {
+        startEdit(initialEditSource)
+      } else {
+        resetForm()
+      }
     }
-  }, [open, loadSources])
+  }, [open, loadSources, initialEditSource])
 
   const resetForm = () => {
     setEditingSource(null)

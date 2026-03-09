@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useExpense } from "@/contexts/expense-context"
 import { getIncomeSources } from "@/lib/storage"
 import { getOrdinalSuffix } from "@/lib/expense-utils"
-import { DollarSign, Check, Circle } from "lucide-react"
+import { DollarSign, Check, Circle, Pencil, Trash2 } from "lucide-react"
+import { deleteIncomeSource } from "@/lib/storage"
+import { toast } from "sonner"
 import { AddIncomeSourceModal } from "./add-income-source-modal"
 import type { IncomeSource } from "@/lib/types"
 
@@ -14,6 +16,18 @@ export function IncomeSourcesSection() {
 
   const [sources, setSources] = useState<IncomeSource[]>([])
   const [modalOpen, setModalOpen] = useState(false)
+  const [editSource, setEditSource] = useState<IncomeSource | null>(null)
+
+  const handleEdit = (source: IncomeSource) => {
+    setEditSource(source)
+    setModalOpen(true)
+  }
+
+  const handleDelete = (source: IncomeSource) => {
+    deleteIncomeSource(source.id)
+    toast.success("Income source removed", { description: source.name })
+    loadSources()
+  }
 
   const loadSources = useCallback(() => {
     setSources(getIncomeSources())
@@ -111,8 +125,12 @@ export function IncomeSourcesSection() {
 
         <AddIncomeSourceModal
           open={modalOpen}
-          onOpenChange={setModalOpen}
+          onOpenChange={(open) => {
+            setModalOpen(open)
+            if (!open) setEditSource(null)
+          }}
           onSaved={loadSources}
+          initialEditSource={editSource}
         />
       </>
     )
@@ -153,7 +171,7 @@ export function IncomeSourcesSection() {
               return (
                 <div
                   key={source.id}
-                  className="flex items-center gap-3"
+                  className="group flex items-center gap-3"
                 >
                   <div className="shrink-0">
                     {received ? (
@@ -170,6 +188,24 @@ export function IncomeSourcesSection() {
                     <p className="text-sm font-medium text-foreground truncate">
                       {source.name}
                     </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(source)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      aria-label={`Edit ${source.name}`}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(source)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      aria-label={`Delete ${source.name}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-medium tabular-nums text-foreground">
@@ -204,8 +240,12 @@ export function IncomeSourcesSection() {
 
       <AddIncomeSourceModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(open) => {
+          setModalOpen(open)
+          if (!open) setEditSource(null)
+        }}
         onSaved={loadSources}
+        initialEditSource={editSource}
       />
     </>
   )
