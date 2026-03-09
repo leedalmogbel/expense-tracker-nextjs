@@ -48,6 +48,8 @@ import {
 } from "@/lib/expense-utils"
 import { format } from "date-fns"
 import { CATEGORY_ICONS, PAYMENT_METHODS, DEFAULT_TAG_MAPPINGS } from "@/lib/constants"
+import { useAuth } from "@/contexts/auth-context"
+import { saveCurrencyPreference } from "@/lib/supabase-api"
 
 type MonthFilter = { year: number; month: number } | null
 
@@ -130,13 +132,18 @@ function normalizeCategory(cat: string): string {
 }
 
 export function ExpenseProvider({ children }: { children: React.ReactNode }) {
+  const { user, isSupabaseConfigured } = useAuth()
   const [transactions, setTransactions] = React.useState<Transaction[]>([])
   const [currentBudget, setCurrentBudgetState] = React.useState<MonthlyBudget | null>(null)
   const [currency, setCurrencyState] = React.useState<Currency>(() => getCurrency())
   const setCurrency = React.useCallback((c: Currency) => {
     storageSetCurrency(c)
     setCurrencyState(c)
-  }, [])
+    // Sync to profile in Supabase
+    if (user && isSupabaseConfigured) {
+      saveCurrencyPreference(user.id, c.code).catch(() => {})
+    }
+  }, [user, isSupabaseConfigured])
   const [paymentMethods, setPaymentMethodsState] = React.useState<string[]>(() => {
     const stored = getStoredPaymentMethods()
     const defaults = [...PAYMENT_METHODS]

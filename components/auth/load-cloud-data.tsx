@@ -3,13 +3,15 @@
 import { useEffect, useRef } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { useExpense } from "@/contexts/expense-context"
-import { fetchHouseholdTransactions } from "@/lib/supabase-api"
-import { getTransactions, saveTransactions } from "@/lib/storage"
+import { fetchHouseholdTransactions, fetchCurrencyPreference } from "@/lib/supabase-api"
+import { getTransactions, saveTransactions, setCurrency as storageSetCurrency } from "@/lib/storage"
+import { CURRENCIES } from "@/lib/constants"
 
 /**
  * When the user is signed in, fetches their household transactions from Supabase
  * and merges them into localStorage (deduplicated by id) + refreshes the expense
  * context so the UI shows cloud data without duplicating existing local entries.
+ * Also loads user preferences (currency) from their profile.
  * Runs once per session when the dashboard is first shown.
  *
  * Note: Cloud data LOADING is available to all signed-in users (so data isn't lost
@@ -17,13 +19,26 @@ import { getTransactions, saveTransactions } from "@/lib/storage"
  */
 export function LoadCloudData() {
   const { user, isSupabaseConfigured } = useAuth()
-  const { refresh } = useExpense()
+  const { refresh, setCurrency } = useExpense()
   const hasLoadedRef = useRef(false)
 
   useEffect(() => {
     if (!user || !isSupabaseConfigured || hasLoadedRef.current) return
 
     hasLoadedRef.current = true
+
+    // Load currency preference from profile
+    fetchCurrencyPreference(user.id).then(({ currencyCode }) => {
+      if (currencyCode) {
+        const match = CURRENCIES.find((c) => c.code === currencyCode)
+        if (match) {
+          storageSetCurrency(match)
+          setCurrency(match)
+        }
+      }
+    })
+
+    // Load cloud transactions
     fetchHouseholdTransactions(user.id).then(({ transactions: cloudTxs, error }) => {
       if (error) return
       if (cloudTxs.length > 0) {
@@ -36,7 +51,7 @@ export function LoadCloudData() {
         refresh()
       }
     })
-  }, [user?.id, isSupabaseConfigured, refresh])
+  }, [user?.id, isSupabaseConfigured, refresh, setCurrency])
 
   return null
 }

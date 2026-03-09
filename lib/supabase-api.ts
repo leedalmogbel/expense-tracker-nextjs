@@ -956,3 +956,36 @@ export async function updateLastActive(
   if (!supabase) return
   await supabase.rpc("update_last_active", { p_user_id: userId }).catch(() => {})
 }
+
+// ─── User Preferences (stored in profiles) ──────────────────────────────────
+
+/**
+ * Fetch the user's saved currency code from their profile.
+ */
+export async function fetchCurrencyPreference(
+  userId: string
+): Promise<{ currencyCode: string | null; error: string | null }> {
+  if (!supabase) return { currencyCode: null, error: "Supabase is not configured." }
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("currency_code")
+    .eq("id", userId)
+    .single()
+  if (error) return { currencyCode: null, error: error.message }
+  return { currencyCode: (data?.currency_code as string) ?? null, error: null }
+}
+
+/**
+ * Save the user's currency preference to their profile.
+ */
+export async function saveCurrencyPreference(
+  userId: string,
+  currencyCode: string
+): Promise<{ error: string | null }> {
+  if (!supabase) return { error: "Supabase is not configured." }
+  const { error } = await supabase
+    .from("profiles")
+    .update({ currency_code: currencyCode })
+    .eq("id", userId)
+  return { error: error?.message ?? null }
+}
