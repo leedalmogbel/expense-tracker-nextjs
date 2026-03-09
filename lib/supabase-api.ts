@@ -954,7 +954,11 @@ export async function updateLastActive(
   userId: string
 ): Promise<void> {
   if (!supabase) return
-  await supabase.rpc("update_last_active", { p_user_id: userId }).catch(() => {})
+  try {
+    await supabase.rpc("update_last_active", { p_user_id: userId })
+  } catch {
+    // Silently ignore — non-critical
+  }
 }
 
 // ─── User Preferences (stored in profiles) ──────────────────────────────────
