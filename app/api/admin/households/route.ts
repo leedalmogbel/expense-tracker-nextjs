@@ -54,6 +54,7 @@ export async function GET(_request: NextRequest) {
           created_at: h.created_at,
           owner_id: h.owner_id,
           owner_name: ownerProfile?.full_name ?? null,
+          owner_email: null, // email not on profiles table
           member_count: memberCountArr?.[0]?.count ?? 0,
         }
       }

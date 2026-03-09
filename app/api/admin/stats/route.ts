@@ -27,10 +27,12 @@ export async function GET(_request: NextRequest) {
     }
 
     // Fetch all stats in parallel
+    // Note: subscriptions table has no is_active column.
+    // Active = not expired (expires_at IS NULL or expires_at > now).
+    const now = new Date().toISOString()
     const [
       totalUsersResult,
       premiumUsersResult,
-      freeUsersResult,
       earlyAdopterResult,
       activeUsersResult,
       inactiveUsersResult,
@@ -40,25 +42,19 @@ export async function GET(_request: NextRequest) {
       // Total users
       supabase.from("profiles").select("id", { count: "exact", head: true }),
 
-      // Premium users (users with active premium subscriptions)
+      // Premium users (non-expired premium subscriptions)
       supabase
         .from("subscriptions")
         .select("id", { count: "exact", head: true })
         .eq("plan", "premium")
-        .eq("is_active", true),
+        .or(`expires_at.is.null,expires_at.gt.${now}`),
 
-      // Free users (users with free plan or no subscription)
-      supabase
-        .from("subscriptions")
-        .select("id", { count: "exact", head: true })
-        .eq("plan", "free"),
-
-      // Early adopter slots used
+      // Early adopter slots used (non-expired early adopter subscriptions)
       supabase
         .from("subscriptions")
         .select("id", { count: "exact", head: true })
         .eq("source", "early_adopter")
-        .eq("is_active", true),
+        .or(`expires_at.is.null,expires_at.gt.${now}`),
 
       // Active users
       supabase
@@ -81,7 +77,8 @@ export async function GET(_request: NextRequest) {
 
     const totalUsers = totalUsersResult.count ?? 0
     const premiumUsers = premiumUsersResult.count ?? 0
-    const freeUsers = freeUsersResult.count ?? 0
+    // Free users = total minus premium (free users may not have a subscription row)
+    const freeUsers = Math.max(0, totalUsers - premiumUsers)
     const earlyAdopterSlotsUsed = earlyAdopterResult.count ?? 0
     const earlyAdopterSlotsRemaining = Math.max(
       0,
