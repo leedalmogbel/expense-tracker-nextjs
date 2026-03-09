@@ -1,14 +1,16 @@
 "use client"
 
-import { Bell, UserPlus, UserCheck, Receipt, CheckCheck, CreditCard, Target, ShoppingCart } from "lucide-react"
+import { Bell, UserPlus, UserCheck, Receipt, CheckCheck, CreditCard, Target, ShoppingCart, MailOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { useNotifications } from "@/contexts/notification-context"
 import { formatDistanceToNow, parseISO } from "date-fns"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 const TYPE_ICON: Record<string, typeof UserPlus> = {
   invite_sent: UserPlus,
+  invite_received: MailOpen,
   member_joined: UserCheck,
   transaction_added: Receipt,
   card_due: CreditCard,
@@ -19,6 +21,7 @@ const TYPE_ICON: Record<string, typeof UserPlus> = {
 
 const TYPE_COLOR: Record<string, string> = {
   invite_sent: "text-blue-500 bg-blue-500/10",
+  invite_received: "text-violet-500 bg-violet-500/10",
   member_joined: "text-primary bg-primary/10",
   transaction_added: "text-emerald-500 bg-emerald-500/10",
   card_due: "text-amber-500 bg-amber-500/10",
@@ -28,6 +31,7 @@ const TYPE_COLOR: Record<string, string> = {
 }
 
 export function NotificationPopover() {
+  const router = useRouter()
   const { notifications, unreadCount, markAsRead, markAllRead } = useNotifications()
   const hasNotifications = unreadCount > 0
   const badgeLabel = unreadCount >= 10 ? "9+" : String(unreadCount)
@@ -96,7 +100,10 @@ export function NotificationPopover() {
               return (
                 <button
                   key={n.id}
-                  onClick={() => !n.read && markAsRead(n.id)}
+                  onClick={() => {
+                    if (!n.read) markAsRead(n.id)
+                    if (n.type === "invite_received") router.push("/dashboard/members")
+                  }}
                   className={cn(
                     "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50",
                     !n.read && "bg-primary/[0.04]",

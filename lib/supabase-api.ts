@@ -597,15 +597,15 @@ export async function getHouseholdInvites(
  */
 export async function getPendingInvitesForEmail(
   email: string
-): Promise<{ invites: { id: string; household_id: string; role: string; households?: { name: string } | null }[]; error: string | null }> {
+): Promise<{ invites: { id: string; household_id: string; email: string; role: string; households?: { name: string } | null }[]; error: string | null }> {
   if (!supabase) return { invites: [], error: "Supabase is not configured." }
   const { data, error } = await supabase
     .from("household_invites")
-    .select("id, household_id, role, households(name)")
+    .select("id, household_id, email, role, households(name)")
     .eq("email", email.toLowerCase().trim())
     .eq("status", "pending")
   if (error) return { invites: [], error: error.message }
-  return { invites: (data ?? []) as { id: string; household_id: string; role: string; households?: { name: string } | null }[], error: null }
+  return { invites: (data ?? []) as unknown as { id: string; household_id: string; email: string; role: string; households?: { name: string } | null }[], error: null }
 }
 
 /**
@@ -801,7 +801,7 @@ export type AppNotification = {
   id: string
   user_id: string
   household_id: string
-  type: "invite_sent" | "member_joined" | "transaction_added" | "card_due" | "card_overdue" | "budget_threshold" | "shopping_reminder"
+  type: "invite_sent" | "invite_received" | "member_joined" | "transaction_added" | "card_due" | "card_overdue" | "budget_threshold" | "shopping_reminder"
   title: string
   message: string
   actor_name: string | null
