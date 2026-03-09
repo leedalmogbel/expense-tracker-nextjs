@@ -41,7 +41,7 @@ export function PromoCodeTable() {
       const res = await fetch("/api/admin/promo-codes")
       if (!res.ok) throw new Error("Failed to fetch promo codes")
       const data = await res.json()
-      setPromoCodes(data.promoCodes ?? data)
+      setPromoCodes(data.promo_codes ?? data)
     } catch (err) {
       toast.error("Failed to load promo codes")
       console.error(err)

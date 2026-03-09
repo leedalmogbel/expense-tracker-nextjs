@@ -103,12 +103,6 @@ export function UsersTable() {
         throw new Error(errorData.error || "Action failed")
       }
 
-      const updated = await res.json()
-
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, ...updated.user } : u))
-      )
-
       const labels: Record<string, string> = {
         grant_premium: "Premium granted",
         revoke_premium: "Premium revoked",
@@ -116,6 +110,9 @@ export function UsersTable() {
         reactivate: "User reactivated",
       }
       toast.success(labels[action])
+
+      // Refetch to get updated data from server
+      await fetchUsers(page, search)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Action failed")
     } finally {
