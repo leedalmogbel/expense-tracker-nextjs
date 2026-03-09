@@ -432,7 +432,16 @@ export function setOnboardingDismissed(value: boolean): void {
 
 // --- Clear all ---
 
+// Keys that should survive logout (user preferences, not user data)
+const PRESERVE_ON_LOGOUT: Set<string> = new Set([
+  STORAGE_KEYS.CURRENCY,
+  STORAGE_KEYS.DEVICE_ID,
+  STORAGE_KEYS.ONBOARDING_DISMISSED,
+])
+
 export function clearAllData(): void {
   if (!isClient) return
-  Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key))
+  Object.values(STORAGE_KEYS).forEach((key) => {
+    if (!PRESERVE_ON_LOGOUT.has(key)) localStorage.removeItem(key)
+  })
 }

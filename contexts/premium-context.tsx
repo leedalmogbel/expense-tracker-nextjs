@@ -11,6 +11,10 @@ import {
 import type { PremiumFeatureId } from "@/lib/premium-features"
 import type { SubscriptionPlan, SubscriptionSource } from "@/lib/supabase-db-types"
 
+const DEV_BYPASS_AUTH =
+  process.env.NODE_ENV === "development" &&
+  process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === "true"
+
 const LS_KEY = "doshmate_premium_cache"
 
 type PremiumCache = {
@@ -56,8 +60,8 @@ export function PremiumProvider({ children }: { children: React.ReactNode }) {
   const [source, setSource] = React.useState<SubscriptionSource | null>(cached.current?.source ?? null)
   const [loading, setLoading] = React.useState(true)
 
-  // Superadmins are always premium
-  const isPremium = isSuperadmin || plan === "premium"
+  // Dev bypass, superadmins, and premium subscribers all get full access
+  const isPremium = DEV_BYPASS_AUTH || isSuperadmin || plan === "premium"
 
   const refreshSubscription = React.useCallback(async () => {
     if (!user || !isSupabaseConfigured()) {
