@@ -1,36 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { requireAdmin } from "@/lib/admin-auth"
 
 export async function GET(_request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const auth = await requireAdmin()
+    if (!auth.authorized) return auth.response
+    const { supabase } = auth
 
-    // Auth check
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    // Superadmin check
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
-
-    if (profileError || profile?.role !== "superadmin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
-    // Fetch households with owner profile name and member count
+    // Fetch households with member count
+    // Note: households.owner_id references auth.users, not profiles directly,
+    // so we fetch owner names separately.
     const { data: households, error: queryError } = await supabase
       .from("households")
-      .select(
-        "id, name, created_at, owner_id, profiles!households_owner_id_fkey(full_name), household_members(count)"
-      )
+      .select("id, name, created_at, owner_id, household_members(count)")
       .order("created_at", { ascending: false })
 
     if (queryError) {
@@ -41,10 +23,33 @@ export async function GET(_request: NextRequest) {
       )
     }
 
+    // Fetch owner profiles for all unique owner_ids
+    const ownerIds = [
+      ...new Set(
+        (households || [])
+          .map((h: Record<string, unknown>) => h.owner_id as string)
+          .filter(Boolean)
+      ),
+    ]
+    let ownerMap: Record<string, string> = {}
+    if (ownerIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", ownerIds)
+      if (profiles) {
+        ownerMap = Object.fromEntries(
+          profiles.map((p: Record<string, unknown>) => [
+            p.id,
+            p.full_name ?? null,
+          ])
+        )
+      }
+    }
+
     // Flatten the response for cleaner output
     const formattedHouseholds = (households || []).map(
       (h: Record<string, unknown>) => {
-        const ownerProfile = h.profiles as Record<string, unknown> | null
         const memberCountArr = h.household_members as
           | { count: number }[]
           | null
@@ -53,8 +58,8 @@ export async function GET(_request: NextRequest) {
           name: h.name,
           created_at: h.created_at,
           owner_id: h.owner_id,
-          owner_name: ownerProfile?.full_name ?? null,
-          owner_email: null, // email not on profiles table
+          owner_name: ownerMap[h.owner_id as string] ?? null,
+          owner_email: null,
           member_count: memberCountArr?.[0]?.count ?? 0,
         }
       }

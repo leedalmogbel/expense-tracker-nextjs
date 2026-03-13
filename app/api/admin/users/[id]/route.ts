@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { requireAdmin } from "@/lib/admin-auth"
 
 const VALID_ACTIONS = [
   "grant_premium",
@@ -50,27 +50,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
-
-    // Auth check
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    // Superadmin check
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single()
-
-    if (profileError || profile?.role !== "superadmin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
+    const auth = await requireAdmin()
+    if (!auth.authorized) return auth.response
+    const { userId, supabase } = auth
 
     const { id: targetUserId } = await params
     const body = await request.json()
@@ -87,7 +69,7 @@ export async function PATCH(
     }
 
     // Prevent self-deactivation
-    if (action === "deactivate" && targetUserId === user.id) {
+    if (action === "deactivate" && targetUserId === userId) {
       return NextResponse.json(
         { error: "Cannot deactivate your own account" },
         { status: 400 }
@@ -95,7 +77,7 @@ export async function PATCH(
     }
 
     const actionConfig = ACTION_RPC_MAP[action as Action]
-    const rpcParams = actionConfig.params(user.id, targetUserId)
+    const rpcParams = actionConfig.params(userId, targetUserId)
 
     const { error: rpcError } = await supabase.rpc(actionConfig.rpc, rpcParams)
 
