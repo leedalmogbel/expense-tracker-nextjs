@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(MOCK_USER)
   const [session, setSession] = React.useState<Session | null>(null)
   const [loading, setLoading] = React.useState(!DEV_BYPASS_AUTH)
-  const [isSuperadmin, setIsSuperadmin] = React.useState(false)
+  const [isSuperadmin, setIsSuperadmin] = React.useState(DEV_BYPASS_AUTH)
 
   React.useEffect(() => {
     if (DEV_BYPASS_AUTH) return
