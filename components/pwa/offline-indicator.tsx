@@ -11,12 +11,12 @@ export function OfflineIndicator() {
     setIsOffline(!navigator.onLine)
 
     const handleOffline = () => {
-      setIsOffline(true)
-      setDismissed(false)
+      setIsOffline(true);
+      setDismissed(false);
     }
     const handleOnline = () => {
-      setIsOffline(false)
-      setDismissed(false)
+      setIsOffline(false);
+      setDismissed(false);
     }
 
     window.addEventListener("offline", handleOffline)
